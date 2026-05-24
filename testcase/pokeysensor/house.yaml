@@ -1,55 +1,5 @@
-# ---------------------------------------------------------
-# HOUSE (Level 3)
-# ---------------------------------------------------------
-house:
-  HOME:
-    name: Haus
-    includes: [EG, OS, WG, OG, DG, NU]
+## see apps_v2/hc_smet/app/domain/house.yaml
 
-# ---------------------------------------------------------
-# AREAS (Level 2)
-# ---------------------------------------------------------
-areas:
-  EG: { name: Kellergeschoss }
-  OS: { name: Außenbereich }
-  WG: { name: Wohngeschoss }
-  OG: { name: Obergeschoss }
-  DG: { name: Dachgeschoss }
-  NU: { name: Reserve }
-
-# ---------------------------------------------------------
-# ROOMS (Level 1)
-# ---------------------------------------------------------
-rooms:
-  EG_R01: { name: Büro, area: EG }
-  EG_R02: { name: Wirtschaftsraum, area: EG }
-  EG_R03: { name: Vorratsraum, area: EG }
-  EG_R04: { name: Gang, area: EG }
-  EG_R05: { name: Zählerschrank, area: EG }
-
-  OS_R01: { name: Garage, area: OS }
-  OS_R02: { name: Garten, area: OS }
-
-  WG_R01: { name: Eingang, area: WG }
-  WG_R02: { name: Gäste WC, area: WG }
-  WG_R03: { name: Küche, area: WG }
-  WG_R04: { name: Wohnzimmer, area: WG }
-  WG_R05: { name: Wintergarten, area: WG }
-
-  OG_R01: { name: Flur, area: OG }
-  OG_R02: { name: Bad, area: OG }
-  OG_R03: { name: Zimmer Tina, area: OG }
-  OG_R04: { name: Zimmer Gäste, area: OG }
-  OG_R05: { name: Schlafzimmer, area: OG }
-
-  DG_R01: { name: Fitnessraum, area: DG }
-  DG_R02: { name: Allgemein, area: DG }
-
-  NU_R99: { name: Reserve, area: NU }
-
-# ---------------------------------------------------------
-# SENSORS (Level 0)
-# ---------------------------------------------------------
 sensors:
 
   # EG / Technik / Heizung
