@@ -1,0 +1,36 @@
+services:
+  hc_scale:
+    build: .
+    container_name: hc_scale
+    restart: unless-stopped
+
+    ports:
+      - "5000:5056"
+
+    volumes:
+      - ${PWD}/data:/app/data
+      - ${PWD}/config:/app/config
+      - ${PWD}/frontend:/app/frontend
+      - ${PWD}/logs:/app/logs
+
+    env_file:
+      - .env
+
+    environment:
+      - TZ=Europe/Vaduz
+      - ROOT_PATH=/dashboardmiscale
+
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5056/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+

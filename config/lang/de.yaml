@@ -1,0 +1,37 @@
+# Sprachdatei Deutsch für home-miscale
+
+body_scale_types:
+  - "Fettleibig"
+  - "Übergewichtig"
+  - "Dick"
+  - "Bewegungsmangel"
+  - "Ausgeglichen"
+  - "Ausgeglichen Muskulös"
+  - "Dünn"
+  - "Ausgeglichen Dünn"
+  - "Dünn Muskulös"
+
+diff_text:
+  down: "Abgenommen"
+  same: "Keine Veränderung"
+  up: "Zugenommen"
+
+labels:
+  weight: "Gewicht"
+  fat: "Fettanteil"
+  muscle: "Muskelmasse"
+  water: "Wasseranteil"
+  bone: "Knochenmasse"
+  visceral: "Viszeralfett"
+  protein: "Protein"
+  metabolic_age: "Metabolisches Alter"
+  impedance: "Impedanz"
+  bmr: "Grundumsatz"
+  tdee: "Tagesumsatz"
+  lbm: "Lean Body Mass"
+  poi: "Ponderal Index"
+  ffm: "Fat Free Mass"
+  ffmi: "FFMI"
+  idealweight: "Idealgewicht"
+  bodytype: "Körpertyp"
+  score: "Score"

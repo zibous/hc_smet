@@ -1,0 +1,152 @@
+# Home Assistant MQTT Discovery Sensor-Definitionen
+# key: json_key im MQTT Payload
+# name: Anzeigename in HA (wird mit Username prefixed)
+# unit: Einheit
+# icon: MDI Icon
+# device_class: HA device_class (optional)
+# state_class: HA state_class (optional)
+# topic: "data" oder "scores" (welches MQTT Topic)
+
+device:
+  model: "Mi Body Composition Scale 2"
+  manufacturer: "Xiaomi"
+
+sensors:
+  # Data-Sensoren (state_topic: {topic}/{user}/data)
+  - key: weight
+    name: Gewicht
+    unit: kg
+    icon: mdi:scale-bathroom
+    device_class: weight
+    state_class: measurement
+    topic: data
+    json_attributes: true
+
+  - key: bmi
+    name: BMI
+    unit: ""
+    icon: mdi:human
+    state_class: measurement
+    topic: data
+
+  - key: fat
+    name: Fettanteil
+    unit: "%"
+    icon: mdi:percent
+    state_class: measurement
+    topic: data
+
+  - key: muscle
+    name: Muskelmasse
+    unit: "%"
+    icon: mdi:arm-flex
+    state_class: measurement
+    topic: data
+
+  - key: water
+    name: Wasseranteil
+    unit: "%"
+    icon: mdi:water-percent
+    state_class: measurement
+    topic: data
+
+  - key: bone
+    name: Knochenmasse
+    unit: kg
+    icon: mdi:bone
+    device_class: weight
+    state_class: measurement
+    topic: data
+
+  - key: visceral
+    name: Viszeralfett
+    unit: ""
+    icon: mdi:stomach
+    state_class: measurement
+    topic: data
+
+  - key: protein
+    name: Protein
+    unit: "%"
+    icon: mdi:food-steak
+    state_class: measurement
+    topic: data
+
+  - key: metabolic_age
+    name: Metabolisches Alter
+    unit: Jahre
+    icon: mdi:calendar-clock
+    state_class: measurement
+    topic: data
+
+  - key: impedance
+    name: Impedanz
+    unit: Ω
+    icon: mdi:flash
+    state_class: measurement
+    topic: data
+
+  - key: bmr
+    name: Grundumsatz
+    unit: kcal
+    icon: mdi:fire
+    state_class: measurement
+    topic: data
+
+  - key: tdee
+    name: Tagesumsatz
+    unit: kcal
+    icon: mdi:lightning-bolt
+    state_class: measurement
+    topic: data
+
+  - key: lbm
+    name: Lean Body Mass
+    unit: kg
+    icon: mdi:human-handsup
+    device_class: weight
+    state_class: measurement
+    topic: data
+
+  - key: poi
+    name: Ponderal Index
+    unit: ""
+    icon: mdi:chart-line
+    state_class: measurement
+    topic: data
+
+  - key: ffm
+    name: Fat Free Mass
+    unit: kg
+    icon: mdi:human
+    device_class: weight
+    state_class: measurement
+    topic: data
+
+  - key: ffmi
+    name: FFMI
+    unit: ""
+    icon: mdi:chart-bar
+    state_class: measurement
+    topic: data
+
+  - key: idealweight
+    name: Idealgewicht
+    unit: kg
+    icon: mdi:target
+    device_class: weight
+    topic: data
+
+  - key: bodytype
+    name: Körpertyp
+    unit: ""
+    icon: mdi:human-male
+    topic: data
+
+  # Score-Sensoren (state_topic: {topic}/{user}/scores)
+  - key: score
+    name: Score
+    unit: ""
+    icon: mdi:star
+    state_class: measurement
+    topic: scores
