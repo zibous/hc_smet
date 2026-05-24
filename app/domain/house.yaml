@@ -1,0 +1,119 @@
+# ---------------------------------------------------------
+# HOUSE (Level 3)
+# ---------------------------------------------------------
+house:
+  HOME:
+    name: Haus
+    includes: [EG, OS, WG, OG, DG, NU]
+
+# ---------------------------------------------------------
+# AREAS (Level 2)
+# ---------------------------------------------------------
+areas:
+  EG: { name: Kellergeschoss }
+  OS: { name: Außenbereich }
+  WG: { name: Wohngeschoss }
+  OG: { name: Obergeschoss }
+  DG: { name: Dachgeschoss }
+  NU: { name: Reserve }
+
+# ---------------------------------------------------------
+# ROOMS (Level 1)
+# ---------------------------------------------------------
+rooms:
+  EG_R01: { name: Büro, area: EG }
+  EG_R02: { name: Wirtschaftsraum, area: EG }
+  EG_R03: { name: Vorratsraum, area: EG }
+  EG_R04: { name: Gang, area: EG }
+  EG_R05: { name: Zählerschrank, area: EG }
+
+  OS_R01: { name: Garage, area: OS }
+  OS_R02: { name: Garten, area: OS }
+
+  WG_R01: { name: Eingang, area: WG }
+  WG_R02: { name: Gäste WC, area: WG }
+  WG_R03: { name: Küche, area: WG }
+  WG_R04: { name: Wohnzimmer, area: WG }
+  WG_R05: { name: Wintergarten, area: WG }
+
+  OG_R01: { name: Flur, area: OG }
+  OG_R02: { name: Bad, area: OG }
+  OG_R03: { name: Zimmer Tina, area: OG }
+  OG_R04: { name: Zimmer Gäste, area: OG }
+  OG_R05: { name: Schlafzimmer, area: OG }
+
+  DG_R01: { name: Fitnessraum, area: DG }
+  DG_R02: { name: Allgemein, area: DG }
+
+  NU_R99: { name: Reserve, area: NU }
+
+# ---------------------------------------------------------
+# SENSORS (Level 0)
+# ---------------------------------------------------------
+sensors:
+
+  S01: { name: Licht, room: EG_R02, devices: [pumpe, licht] }
+  S02: { name: Heizung, room: EG_R02, devices: [heizungsgeraet] }
+  S03: { name: Abwasserpumpe, room: EG_R02, devices: [heizungspumpe] }
+
+  S04: { name: Gang / Vorratsraum, room: EG_R04, devices: [gang, vorratsraum] }
+  S05: { name: Tiefkühltruhe, room: EG_R03, devices: [tiefkuehltruhe] }
+
+  S06: { name: Technik EG, room: EG_R05, devices: [licht, telefonanlage, wlan] }
+
+  S07: { name: Gäste WC, room: WG_R02, devices: [wc, gang] }
+
+  S08: { name: Küchengeräte, room: WG_R03, devices: [kueche, geschirrspueler] }
+  S09: { name: Licht & Steckdosen, room: WG_R03, devices: [licht, steckdosen] }
+  S10: { name: Wohnzimmer Verbraucher, room: WG_R04, devices: [wohnzimmer] }
+  S11: { name: Wohnzimmer Media, room: WG_R04, devices: [tv, rolladen, soundanlage] }
+
+  S12: { name: Küchenmöbel, room: WG_R03, devices: [kuechenmoebel] }
+  S13: { name: Kühlschrank, room: WG_R03, devices: [kuehlschrank] }
+  S15: { name: Abwaschmaschine, room: WG_R03, devices: [spuelmaschine] }
+  S35: { name: Herd, room: WG_R03, devices: [herd] }
+
+  S16: { name: Licht & Steckdosen, room: OG_R01, devices: [licht, steckdosen] }
+
+  S17: { name: Kinderzimmer 2, room: OG_R04, devices: [kinderzimmer_2] }
+  S19: { name: Kinderzimmer 1, room: OG_R03, devices: [kinderzimmer_1] }
+
+  S20: { name: Schlafzimmer, room: OG_R05, devices: [schlafzimmer] }
+  S25: { name: Schlafzimmer Licht, room: OG_R05, devices: [licht] }
+
+  S21: { name: Fitnessraum Media, room: DG_R01, devices: [fitnessraum] }
+  S22: { name: Fitnessraum Strom, room: DG_R01, devices: [licht, steckdosen] }
+  S23: { name: Wechselrichter, room: DG_R01, devices: [piko_wechselrichter] }
+
+  S29: { name: Garage, room: OS_R01, devices: [garage] }
+
+  S30: { name: Zählerschrank Geräte, room: EG_R05, devices: [zaehlerschrank] }
+  S37: { name: Zählerschrank Netzteil, room: EG_R05, devices: [netzteil] }
+
+  S32: { name: Büro Rechner, room: EG_R01, devices: [rechner] }
+
+  S33: { name: Bad, room: OG_R02, devices: [licht, wc, steckdosen, dampfdusche] }
+
+  S34: { name: Boiler, room: EG_R02, devices: [boiler] }
+  S36: { name: Waschmaschine & Trockner, room: EG_R02, devices: [waschmaschine, trockner] }
+
+  # Reserven
+  S24: { name: Reserve, room: DG_R02, devices: [reserve] }
+  S26: { name: Reserve, room: DG_R01, devices: [reserve] }
+  S27: { name: Reserve, room: DG_R02, devices: [reserve] }
+  S28: { name: Reserve, room: DG_R02, devices: [reserve] }
+  S31: { name: Reserve Büro, room: EG_R01, devices: [reserve] }
+
+  S38: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S39: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S40: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S41: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S42: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S43: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S44: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S45: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S46: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S47: { name: Reserve, room: NU_R99, devices: [reserve] }
+  S48: { name: Reserve, room: WG_R05, devices: [reserve] }
+  S49: { name: Reserve, room: WG_R01, devices: [reserve] }
+  S50: { name: Reserve, room: OS_R02, devices: [reserve] }

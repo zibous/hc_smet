@@ -1,0 +1,84 @@
+import logging
+import time
+from fastapi import APIRouter, Request, Depends, status
+
+from app.services.sensor_service import SensorService
+from app.services.state.sensor_store import SensorStore
+
+logger = logging.getLogger(__name__)
+router = APIRouter(tags=["decode_post"])
+
+# =================================================================
+# DEPENDENCY INJECTION (Langlebige Instanz statt jedes Mal I/O-Load)
+# =================================================================
+# Wir erzeugen den Store einmalig als Singleton-Ersatz auf Modulebene
+_shared_store = SensorStore()
+
+def get_sensor_service() -> SensorService:
+    """Liefert den SensorService mit dem geteilten, langlebigen Speicher."""
+    return SensorService(_shared_store)
+
+# =================================================================
+# ENDPUNKT FÜR SENSOR-DATA-POSTS
+# =================================================================
+@router.post("/", status_code=status.HTTP_200_OK)
+async def receive(
+    request: Request,
+    service: SensorService = Depends(get_sensor_service)
+):
+    body = await request.body()
+    device = request.headers.get("User-Agent")
+    is_simulator = request.headers.get("X-Source") == "simulator"
+
+    # Validierung der HTTP-Metadaten
+    if not body:
+        return {"status": "empty body"}
+
+    if not device:
+        return {"status": "missing device"}
+
+    try:
+        payload = body.decode("utf-8", errors="ignore")
+    except Exception as e:
+        logger.error(f"Payload-Dekodierung fehlgeschlagen: {e}")
+        return {"status": "invalid encoding"}
+
+    if not payload:
+        return {"status": "missing payload"}
+
+    # 🔧 1. SCHRITT: Zustand des Erststart-Schutzes aus dem Store abfragen
+    # Wenn die JSON-Datei fehlt oder kaputt war, schalten wir die DB-Injektion starr ab!
+    is_first_calibration = _shared_store.is_first_run
+
+    if is_first_calibration:
+        logger.warning(
+            f"🛡️ Erststart-Schutz aktiv für {device}! "
+            f"Dieser PoKey-Call dient nur zur Zählerstand-Kalibrierung. "
+            f"Es werden KEINE Daten in die SQLite-Datenbank geschrieben."
+        )
+
+    # 🔧 2. SCHRITT: 'skip_db' Argument an den SensorService übergeben
+    # Verhindert, dass der riesige absolute Gesamtzählerstand in die hourly_values geschrieben wird.
+    result = service.handle(
+        device,
+        payload,
+        simulator=is_simulator,
+        skip_db=is_first_calibration  # 🔧 HIER ALS WÄCHTER EINGEPFLANZT!
+    )
+
+    # Schöne, saubere Logging-Ausgabe anstelle von rohen print()-Statements
+    if is_simulator:
+        sensor_count = len(result)
+        now = int(time.time())
+        sample = list(result.items())[:2]
+
+        logger.info(
+            f"\n==============================\n"
+            f"📡 DEVICE: {device}\n"
+            f"📦 SENSORS: {sensor_count}\n"
+            f"⏱️  TIMESTAMP: {now}\n"
+            f"🔎 SAMPLE: {sample}\n"
+            f"=============================="
+        )
+
+    return {"status": "ok"}

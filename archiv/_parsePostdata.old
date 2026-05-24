@@ -1,0 +1,30 @@
+from typing import Dict
+from urllib.parse import parse_qs, urlparse
+
+from app.core.validator import validate_sensor_value
+
+def get_postData(data: str, index: int = 1) -> Dict[str, float]:
+
+    try:
+        data = data.replace("data=", "")
+        parsed = parse_qs(
+            urlparse("/?" + data.replace(";", "&")).query
+        )
+        sensors = {}
+        for key, value in parsed.items():
+            # echtes Sxx auslesen
+            local_sensor_num = int(key[1:])
+            # global berechnen
+            global_sensor_num = local_sensor_num + (index - 1)
+            # formatieren
+            sensor_id = f"S{global_sensor_num:02}"
+            sensor_value = float(value[0])
+            is_valid, validated_value, error_msg = validate_sensor_value(sensor_value)
+            if not is_valid:
+                continue
+            sensors[sensor_id] = validated_value
+        return sensors
+
+    except Exception as e:
+        print(e)
+        return {}

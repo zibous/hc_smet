@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System-Einstellungen | SmartMeter</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E⚡%3C/text%3E%3C/svg%3E">
+    <style>
+        /* =================================================================
+           THEME DEFINITIONS (CSS Variablen)
+           ================================================================= */
+        :root {
+            /* Standard: Light Mode */
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --primary: #3182ce;
+            --border: #e2e8f0;
+            --dashed-border: #edf2f7;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #dd6b20;
+            --code-bg: #f7fafc;
+            --header-border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            /* Night Mode */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --border: #334155;
+            --dashed-border: #334155;
+            --success: #4ade80;
+            --danger: #f87171;
+            --warning: #fb923c;
+            --code-bg: #0f172a;
+            --header-border: #334155;
+        }
+
+        /* Smooth Transition beim Umschalten */
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--header-border);
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 28px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* =================================================================
+           THEME TOGGLE BUTTON STYLING
+           ================================================================= */
+        .theme-toggle-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary);
+        }
+
+        /* =================================================================
+           GRID & CARD STYLING
+           ================================================================= */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--dashed-border);
+            font-size: 14px;
+        }
+
+        .setting-group:last-child {
+            border-bottom: none;
+        }
+
+        .setting-key {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .setting-value {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: var(--code-bg);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            max-width: 60%;
+            word-break: break-all;
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: #fff;
+        }
+
+        .badge-true { background-color: var(--success); color: #000; }
+        [data-theme="dark"] .badge-true { color: #fff; }
+        .badge-false { background-color: var(--danger); }
+        .badge-mode { background-color: var(--warning); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>⚙️ System-Einstellungen</h1>
+            <p class="subtitle">Vollständige Live-Konfiguration der Anwendung</p>
+        </div>
+        <!-- Der interaktive Umschalter -->
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="Theme umschalten">
+            <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
+        </button>
+    </header>
+
+    <div class="grid">
+        <!-- 1. APPLICATION CARD -->
+        <div class="card">
+            <h2 class="card-title">🚀 Anwendung & Umgebung</h2>
+            <div class="setting-group">
+                <span class="setting-key">App Name</span>
+                <span class="setting-value">{{ settings.get('APP_NAME', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Projekt Name</span>
+                <span class="setting-value">{{ settings.get('PROJECT_NAME', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Server Host</span>
+                <span class="setting-value">{{ settings.get('SERVER_HOST', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Server Port</span>
+                <span class="setting-value">{{ settings.get('SERVER_PORT', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Basis URL</span>
+                <span class="setting-value">{{ settings.get('BASE_URL', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 2. DATA MODE & INTERVALL -->
+        <div class="card">
+            <h2 class="card-title">⚡ Datenerfassung Mode</h2>
+            <div class="setting-group">
+                <span class="setting-key">PoKey Service Typ</span>
+                <span class="badge badge-mode">{{ settings.get('POKEY_SERVICE', 'POST') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Abruf-Intervall</span>
+                <span class="setting-value">{{ settings.get('FETCH_INTERVAL', '-') }} Sekunden</span>
+            </div>
+        </div>
+
+        <!-- 3. DATABASE CARD -->
+        <div class="card">
+            <h2 class="card-title">💾 Datenbank (SQLite)</h2>
+            <div class="setting-group">
+                <span class="setting-key">Datenbank Status</span>
+                <span class="badge {% if settings.get('DB_ENABLED') %}badge-true{% else %}badge-false{% endif %}">
+                    {{ 'Aktiv' if settings.get('DB_ENABLED') else 'Inaktiv' }}
+                </span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Aktuelle DB-Datei</span>
+                <span class="setting-value">{{ settings.get('database_name', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Konfigurierter DB-Pfad</span>
+                <span class="setting-value">{{ settings.get('DB_PATH', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 4. MQTT CARD -->
+        <div class="card">
+            <h2 class="card-title">📡 MQTT Broker</h2>
+            <div class="setting-group">
+                <span class="setting-key">MQTT Status</span>
+                <span class="badge {% if settings.get('MQTT_ENABLED') %}badge-true{% else %}badge-false{% endif %}">
+                    {{ 'Aktiv' if settings.get('MQTT_ENABLED') else 'Inaktiv' }}
+                </span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">MQTT Modus</span>
+                <span class="badge badge-mode">{{ settings.get('mqtt_mode', 'production') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Broker URL</span>
+                <span class="setting-value">{{ settings.get('MQTT_HOST', '-') }}:{{ settings.get('MQTT_PORT', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Client ID</span>
+                <span class="setting-value">{{ settings.get('MQTT_CLIENT_ID', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Benutzername</span>
+                <span class="setting-value">{{ settings.get('MQTT_USERNAME') if settings.get('MQTT_USERNAME') else 'Keiner (Anonym)' }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Passwort</span>
+                <span class="setting-value">{% if settings.get('MQTT_PASSWORD') %}********{% else %}Keines{% endif %}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Sensor Topic (Aktiv)</span>
+                <span class="setting-value">{{ settings.get('mqtt_topic_sensors', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 5. SENSOR MAPPING & TOPOLOGY -->
+        <div class="card">
+            <h2 class="card-title">🗺️ Sensor Mapping & Topologie</h2>
+            <div class="setting-group">
+                <span class="setting-key">Mapping Status</span>
+                <span class="badge {% if settings.get('MAPPING_ENABLED') %}badge-true{% else %}badge-false{% endif %}">
+                    {{ 'Aktiv' if settings.get('MAPPING_ENABLED') else 'Inaktiv' }}
+                </span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">YAML Datei (Relativ)</span>
+                <span class="setting-value">{{ settings.get('_MAPPING_FILE', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 6. LOGGING CARD -->
+        <div class="card">
+            <h2 class="card-title">📝 System-Protokoll (Logging)</h2>
+            <div class="setting-group">
+                <span class="setting-key">Log Level</span>
+                <span class="setting-value" style="color: var(--primary); font-weight: bold;">
+                    {{ settings.get('LOG_LEVEL', '-') }}
+                </span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Log Modus</span>
+                <span class="setting-value">{{ settings.get('LOG_MODE', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Log Ausgabedatei</span>
+                <span class="setting-value">{{ settings.get('LOG_FILE', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 7. HARDWARE DEVICES CARD -->
+        <div class="card">
+            <h2 class="card-title">⚙️ PoKeys Hardware-Geräte</h2>
+            <div class="setting-group">
+                <span class="setting-key">Gerät 1</span>
+                <span class="setting-value"><strong>{{ settings.get('POKEYS_DEVICE1_NAME', '-') }}</strong> (ID: {{ settings.get('POKEYS_DEVICE1_ID', '-') }})</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">IP / Range 1</span>
+                <span class="setting-value">{{ settings.get('POKEYS_DEVICE1_IP', '-') }} | Slots: {{ settings.get('POKEYS_DEVICE1_SENSORS', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">JSON URL 1</span>
+                <span class="setting-value">{{ settings.get('pokeys_device1_get', '-') }}</span>
+            </div>
+            <hr style="border: none; border-bottom: 1px solid var(--border); margin: 10px 0;">
+            <div class="setting-group">
+                <span class="setting-key">Gerät 2</span>
+                <span class="setting-value"><strong>{{ settings.get('POKEYS_DEVICE2_NAME', '-') }}</strong> (ID: {{ settings.get('POKEYS_DEVICE2_ID', '-') }})</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">IP / Range 2</span>
+                <span class="setting-value">{{ settings.get('POKEYS_DEVICE2_IP', '-') }} | Slots: {{ settings.get('POKEYS_DEVICE2_SENSORS', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">JSON URL 2</span>
+                <span class="setting-value">{{ settings.get('pokeys_device2_get', '-') }}</span>
+            </div>
+            <hr style="border: none; border-bottom: 1px solid var(--border); margin: 10px 0;">
+            <div class="setting-group">
+                <span class="setting-key">Sensoren pro Gerät</span>
+                <span class="setting-value">{{ settings.get('SENSOR_PER_DEVICE', '-') }}</span>
+            </div>
+        </div>
+
+        <!-- 8. ABSOLUTE FILE PATHS CARD -->
+        <div class="card">
+            <h2 class="card-title">📁 Absolute Container-Pfade</h2>
+            <div class="setting-group">
+                <span class="setting-key">Daten-Verzeichnis</span>
+                <span class="setting-value">{{ settings.get('DATA_DIR', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Log-Verzeichnis</span>
+                <span class="setting-value">{{ settings.get('LOG_DIR', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Topologie (YAML)</span>
+                <span class="setting-value">{{ settings.get('mapping_file', '-') }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Datenbank-Ordner</span>
+                <span class="setting-value">{{ settings.get('database_path', '-') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =================================================================
+    // DAY / NIGHT MODE SCRIPT
+    // =================================================================
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+
+    // Funktion zum Setzen des Themes
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+
+        if (theme === 'dark') {
+            icon.textContent = '🌙';
+            text.textContent = 'Night Mode';
+        } else {
+            icon.textContent = '☀️';
+            text.textContent = 'Light Mode';
+        }
+    }
+
+    // Initiale Erkennung beim Laden
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (systemPrefersDark) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    // Klick-Event für den Button
+    btn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systemstatus | SmartMeter</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E⚡%3C/text%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --primary: #3182ce;
+            --border: #e2e8f0;
+            --dashed-border: #edf2f7;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #dd6b20;
+            --code-bg: #f7fafc;
+            --header-border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --border: #334155;
+            --dashed-border: #334155;
+            --success: #4ade80;
+            --danger: #f87171;
+            --warning: #fb923c;
+            --code-bg: #0f172a;
+            --header-border: #334155;
+        }
+
+        * { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--header-border);
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        h1 { margin: 0 0 5px 0; font-size: 28px; color: var(--primary); }
+        .subtitle { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+        .theme-toggle-btn {
+            background-color: var(--card-bg); border: 1px solid var(--border); color: var(--text-main);
+            padding: 6px 10px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: 600;
+            display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+
+        .card {
+            background-color: var(--card-bg); border-radius: 8px; border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 20px; display: flex; flex-direction: column;
+        }
+
+        /* Sorgt dafür, dass die Sensor-Karte über die volle Breite springt */
+        .card-full-width { grid-column: 1 / -1; }
+
+        .card-title {
+            font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-muted); margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+        }
+
+        .status-banner {
+            padding: 15px; border-radius: 8px; font-weight: 600; margin-bottom: 24px; text-align: center; font-size: 16px;
+        }
+        .status-healthy { background-color: rgba(56, 161, 105, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .status-unhealthy { background-color: rgba(229, 62, 62, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+        .setting-group {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 0;
+            border-bottom: 1px dashed var(--dashed-border); font-size: 14px;
+        }
+        .setting-group:last-child { border-bottom: none; }
+        .setting-value {
+            font-family: monospace; background-color: var(--code-bg); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border);
+        }
+
+        .badge { font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 3px 8px; border-radius: 12px; color: #fff; }
+        .badge-true { background-color: var(--success); }
+        .badge-false { background-color: var(--danger); }
+
+        /* =================================================================
+           LIVE MONITORING TABLE STYLES
+           ================================================================= */
+        .table-wrapper { overflow-x: auto; max-height: 450px; overflow-y: auto; }
+        .diagnose-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .diagnose-table th { padding: 10px; background: var(--code-bg); border-bottom: 2px solid var(--border); font-weight: 700; color: var(--text-muted); }
+        .diagnose-table td { padding: 8px 10px; border-bottom: 1px solid var(--dashed-border); font-family: monospace; }
+        .delta-flash { background-color: rgba(74, 222, 128, 0.25) !important; color: var(--success) !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>❤️ Systemstatus & Health</h1>
+            <p class="subtitle">Live-Überwachung der SmartMeter Infrastruktur</p>
+        </div>
+        <button class="theme-toggle-btn" id="themeToggle">
+            <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
+        </button>
+    </header>
+
+    <div class="status-banner {% if health.status == 'healthy' %}status-healthy{% else %}status-unhealthy{% endif %}">
+        Systemzustand: {% if health.status == 'healthy' %}🟢 BETRIEBSBEREIT (HEALTHY){% else %}🔴 STÖRUNG (UNHEALTHY){% endif %}
+    </div>
+
+    <div class="grid">
+        <!-- CARD 1: CORE INFO -->
+        <div class="card">
+            <h2 class="card-title">🚀 Kern-Informationen</h2>
+            <div class="setting-group">
+                <span class="setting-key">System Uptime</span>
+                <span class="setting-value" style="color: var(--primary); font-weight: bold;">{{ health.uptime }}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Letzter Check</span>
+                <span id="checkTime" class="setting-value" data-ts="{{ health.timestamp }}">-</span>
+            </div>
+        </div>
+
+        <!-- CARD 2: DATABASE STATUS -->
+        <div class="card">
+            <h2 class="card-title">💾 Datenbank-Zustand</h2>
+            <div class="setting-group">
+                <span class="setting-key">SQLite Verbindung</span>
+                <span class="badge {% if health.database.connected %}badge-true{% else %}badge-false{% endif %}">
+                    {{ 'OK' if health.database.connected else 'FEHLER' }}
+                </span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Aktive Datei</span>
+                <span class="setting-value">{{ health.database.file }}</span>
+            </div>
+            {% if health.database.error %}
+            <div class="setting-group" style="flex-direction: column; align-items: flex-start;">
+                <span class="setting-key" style="color: var(--danger);">Fehlermeldung:</span>
+                <p style="font-size: 11px; margin: 5px 0 0 0; background: var(--code-bg); padding: 5px; border-radius: 4px; border: 1px solid var(--border); width: 100%; word-break: break-all;">
+                    {{ health.database.error }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- CARD 3: HARDWARE METRICS -->
+        <div class="card">
+            <h2 class="card-title">💻 Container Hardware</h2>
+            <div class="setting-group">
+                <span class="setting-key">CPU Auslastung</span>
+                <span class="setting-value">{{ health.hardware.cpu_usage_pct }}{% if health.hardware.cpu_usage_pct != 'N/A' %}%{% endif %}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">RAM Auslastung</span>
+                <span class="setting-value">{{ health.hardware.ram_usage_pct }}{% if health.hardware.ram_usage_pct != 'N/A' %}%{% endif %}</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Freier Speicher (Disk)</span>
+                <span class="setting-value" style="font-weight: bold;">{{ health.hardware.disk_free_gb }} GB</span>
+            </div>
+            <div class="setting-group">
+                <span class="setting-key">Speicher belegt</span>
+                <span class="setting-value">{{ health.hardware.disk_used_pct }}%</span>
+            </div>
+        </div>
+
+        <!-- CARD 4: RECENT LOGS -->
+        <div class="card">
+            <h2 class="card-title">⚠️ Logfile-Analyse</h2>
+            <div class="setting-group">
+                <span class="setting-key">Fehler (Letzte 100 Zeilen)</span>
+                <span class="badge {% if health.logs.recent_errors_count == 0 %}badge-true{% else %}badge-false{% endif %}" style="background-color: {% if health.logs.recent_errors_count == 0 %}var(--success){% else %}var(--warning){% endif %};">
+                    {{ health.logs.recent_errors_count }}
+                </span>
+            </div>
+            <div class="setting-group" style="flex-direction: column; align-items: flex-start;">
+                <span class="setting-key">Aktiver Logpfad</span>
+                <span class="setting-value" style="font-size: 11px; width: 100%; text-align: left; margin-top: 5px;">{{ health.logs.log_file_path }}</span>
+            </div>
+        </div>
+
+        <!-- 🔧 CARD 5: LIVE RUNTIME DIAGNOSTICS FOR S01 - S50 -->
+        <div class="card card-full-width">
+            <h2 class="card-title">🔍 Live-Zustand Zähler-Matrix (S01 - S50) <span id="calibBadge" class="badge" style="display:none; background-color: var(--warning); margin-left: 10px;">Kalibrierung aktiv</span></h2>
+            <div class="table-wrapper">
+                <table class="diagnose-table">
+                    <thead>
+                        <tr>
+                            <th>Sensor ID</th>
+                            <th>Aktueller Stand (current)</th>
+                            <th>Letzter Stand (last)</th>
+                            <th>Stunden-Zuwachs (delta)</th>
+                            <th>Letzte Aktualisierung</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sensorGridBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Lade Live-Matrix aus dem RAM...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Theme-Toggle
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') { if (icon) icon.textContent = '🌙'; if (text) text.textContent = 'Night Mode'; }
+        else { if (icon) icon.textContent = '☀️'; if (text) text.textContent = 'Light Mode'; }
+    }
+
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+    btn.addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+    // Formatierung des Startzeitstempels
+    const checkTimeSpan = document.getElementById("checkTime");
+    if (checkTimeSpan) {
+        const ts = parseInt(checkTimeSpan.getAttribute("data-ts"));
+        checkTimeSpan.textContent = new Date(ts * 1000).toLocaleTimeString("de-DE");
+    }
+
+    // 🔧 LIVE-DIAGNOSE POLLING ENGINE
+    async function fetchLiveSensors() {
+        try {
+            const res = await fetch("/api/diagnose/sensors");
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // Erststart-Kalibrierungs-Badge steuern
+            const calibBadge = document.getElementById("calibBadge");
+            if (calibBadge) {
+                calibBadge.style.display = data.fresh_start_calibration_active ? "inline-block" : "none";
+            }
+
+            const tbody = document.getElementById("sensorGridBody");
+            if (!tbody || !data.sensors) return;
+
+            let html = "";
+            for (const [sid, entry] of Object.entries(data.sensors)) {
+                const dateStr = new Date(entry.timestamp * 1000).toLocaleTimeString("de-DE");
+
+                // Highlight-Klasse injizieren, falls ein echter Verbrauch gemessen wurde
+                const deltaClass = entry.delta > 0 ? "class='delta-flash'" : "";
+
+                html += `
+                    <tr>
+                        <td style="font-weight: bold; color: var(--primary);">${sid}</td>
+                        <td>${entry.current.toFixed(1)} kWh</td>
+                        <td>${entry.last.toFixed(1)} kWh</td>
+                        <td ${deltaClass}>${entry.delta.toFixed(3)} kWh</td>
+                        <td style="color: var(--text-muted);">${dateStr}</td>
+                    </tr>
+                `;
+            }
+            tbody.innerHTML = html;
+        } catch (err) {
+            console.error("Fehler beim Abruf der Diagnose-Matrix:", err);
+        }
+    }
+
+    // Engine sofort zünden und alle 5 Sekunden unauffällig im Hintergrund wiederholen
+    fetchLiveSensors();
+    setInterval(fetchLiveSensors, 5000);
+</script>
+</body>
+</html>

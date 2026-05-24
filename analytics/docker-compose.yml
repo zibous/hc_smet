@@ -1,0 +1,9 @@
+services:
+  energy-analytics:
+    build: .
+    container_name: energy_analytics_service
+    restart: unless-stopped
+    volumes:
+      - ../data:/app/data
+    env_file:
+      - .env

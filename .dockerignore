@@ -1,0 +1,56 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environment / secrets
+.env
+.envrc
+.env.example
+
+# Virtual environments / tooling
+.venv/
+.vscode/
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+.dockerignore
+.backupignore
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Markdown files (all recursive)
+*.md
+
+# Logs / runtime data
+logs/
+data/
+config/
+frontend/
+docs/
+testcases/
+testcase/
+todo/
+archiv/
+analytics/
+scripts/
+tests/
+
+
+# Project / tooling files
+check_result.txt
+Makefile
+check.sh
+pyproject.toml
+pyrightconfig.json
+pytest.ini
+
+# Keep requirements for build
+!requirements.txt

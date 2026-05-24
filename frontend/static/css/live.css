@@ -1,0 +1,258 @@
+/* ----------------------------------------------------
+   LIVE DASHBOARD - Additional Styles
+---------------------------------------------------- */
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: 1.2rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.nav-link:hover {
+  border-color: var(--primary);
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.tab-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 500;
+  transition: 0.15s ease;
+  backdrop-filter: blur(12px);
+}
+.tab-btn:hover {
+  border-color: var(--primary);
+}
+.tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+}
+.section-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+.refresh-info {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+/* Sensor Grid */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+  gap: 1.4rem;
+}
+
+/* Sensor Card */
+.sensor-card {
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-radius: 1.4rem;
+  padding: 1.4rem 1.6rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.sensor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.sensor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+}
+.sensor-card-id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  opacity: 0.8;
+}
+.sensor-card-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.sensor-card-room {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.sensor-card-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.sensor-val {
+  text-align: center;
+}
+.sensor-val-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+  display: block;
+}
+.sensor-val-number {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.delta-positive {
+  color: #ef4444;
+}
+.delta-zero {
+  color: var(--text-muted);
+}
+
+/* Chart Card */
+.chart-card {
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px);
+  border-radius: 1.4rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Hourly Table */
+.hourly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+}
+.hourly-table th,
+.hourly-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.hourly-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+.hourly-table tr:hover td {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+/* Analytics Card Extras */
+.cluster-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-top: 0.6rem;
+}
+.cluster-badge::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.cluster-peak {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+.cluster-peak::before {
+  background: #ef4444;
+}
+.cluster-standard {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+.cluster-standard::before {
+  background: #f59e0b;
+}
+.cluster-base {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+.cluster-base::before {
+  background: #16a34a;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .sensor-grid {
+    grid-template-columns: 1fr;
+  }
+  .tab-nav {
+    flex-wrap: wrap;
+  }
+}
+/* Area Grouping */
+.area-group {
+  margin-bottom: 2.5rem;
+}
+
+.area-group-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Grid innerhalb der Area-Group */
+.area-group .sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+/* Haupt-Grid Container (wenn keine Gruppierung) */
+#sensors-grid:not(:has(.area-group)),
+#analytics-grid:not(:has(.area-group)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+

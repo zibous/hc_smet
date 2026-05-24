@@ -1,0 +1,253 @@
+/* ----------------------------------------------------
+   PERIOD STRIP — VisionOS Glass Compact
+---------------------------------------------------- */
+
+:root {
+  --glass-bg:
+    radial-gradient(circle at 0% 0%,
+      rgba(255,255,255,0.22),
+      rgba(15,23,42,0.92));
+
+  --glass-border: 1px solid rgba(255,255,255,0.22);
+
+  --glass-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 10px 30px rgba(0,0,0,0.42);
+
+  --glass-blur: blur(18px) saturate(180%);
+}
+
+/* ----------------------------------------------------
+   Layout
+---------------------------------------------------- */
+
+.period-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .8rem;
+}
+
+/* ----------------------------------------------------
+   Shared Glass Style
+---------------------------------------------------- */
+
+.period-btn,
+.period-dropdown,
+.range-box,
+.actions button {
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* ----------------------------------------------------
+   Button
+---------------------------------------------------- */
+
+.period-btn {
+  padding: .55rem 1rem;
+  border-radius: 999px;
+  color: #f8fafc;
+  cursor: pointer;
+  font-size: .92rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  white-space: nowrap;
+  transition: .16s ease;
+}
+
+.period-btn::after {
+  content: "▾";
+  font-size: .72rem;
+  opacity: .7;
+}
+
+.period-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.35);
+}
+
+/* ----------------------------------------------------
+   Dropdown
+---------------------------------------------------- */
+
+.period-dropdown {
+  position: fixed !important;
+  min-width: 180px;
+  max-width: 220px;
+  padding: .35rem;
+  border-radius: .95rem;
+  z-index: 999999;
+  animation: dropdownIn .16s ease-out;
+}
+
+.period-dropdown.hidden {
+  display: none;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ----------------------------------------------------
+   Items
+---------------------------------------------------- */
+
+.period-item {
+  padding: .65rem .9rem;
+  border-radius: .7rem;
+  font-size: .92rem;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: .14s ease;
+  opacity: .92;
+}
+
+.period-item:hover {
+  background: rgba(255,255,255,.08);
+  opacity: 1;
+}
+
+.period-item.custom {
+  margin-top: .3rem;
+  padding-top: .9rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* ----------------------------------------------------
+   Dialog
+---------------------------------------------------- */
+
+.range-dialog {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15,23,42,.72);
+  backdrop-filter: blur(18px);
+  z-index: 200000;
+}
+
+.range-box {
+  width: 320px;
+  padding: 1.5rem;
+  border-radius: 1.2rem;
+  color: #f8fafc;
+}
+
+.range-box h3 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.range-box label {
+  display: block;
+  margin-bottom: .9rem;
+  font-size: .9rem;
+}
+
+.range-box input[type="date"] {
+  width: 100%;
+  margin-top: .35rem;
+  padding: .6rem .75rem;
+  border-radius: .7rem;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(15,23,42,.85);
+  color: #f8fafc;
+  font-size: .9rem;
+  outline: none;
+}
+
+.range-box input[type="date"]:focus {
+  border-color: rgba(56,189,248,.7);
+}
+
+/* ----------------------------------------------------
+   Actions
+---------------------------------------------------- */
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .7rem;
+  margin-top: 1rem;
+}
+
+.actions button {
+  padding: .55rem 1rem;
+  border-radius: 999px;
+  color: #f8fafc;
+  cursor: pointer;
+  font-size: .88rem;
+  transition: .14s ease;
+}
+
+.actions button:hover {
+  transform: translateY(-1px);
+}
+
+#applyRange {
+  background:
+    linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   Toggle
+---------------------------------------------------- */
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  cursor: pointer;
+  font-size: .9rem;
+  color: #f8fafc;
+}
+
+.toggle input {
+  display: none;
+}
+
+.slider {
+  position: relative;
+  width: 2.8rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  transition: .2s ease;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  top: .2rem;
+  left: .2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: white;
+  transition: .2s ease;
+}
+
+.toggle input:checked + .slider {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(1.2rem);
+}
