@@ -1,6 +1,5 @@
 import { $, state } from './constants.js';
 import { initTheme, applyChartDefaults } from './theme.js';
-import { fetchUsers, fetchDashboardData, exportToCSV } from './api.js';
 import { renderInfoBar, renderCards, renderAllCharts } from './charts.js';
 
 // Verknüpfung für das Theme-Modul, um bei Theme-Wechsel Diagramme neu zu zeichnen
@@ -29,10 +28,17 @@ function setDateRange(days) {
  * Holt die aktuellen Filterwerte und lädt die Ansicht neu
  */
 async function loadDashboard() {
+  const userId = $('#uSel').value;
+
+  // Abbrechen, falls noch kein Benutzer geladen/ausgewählt wurde
+  if (!userId) {
+    console.warn("⚠️ loadDashboard abgebrochen: Keine user_id vorhanden.");
+    return;
+  }
+
   $('#loadBox').style.display = 'block';
   $('#content').style.display = 'none';
 
-  const userId = $('#uSel').value;
   const fromDate = $('#dFrom').value;
   const toDate = $('#dTo').value;
 
@@ -60,12 +66,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   applyChartDefaults();
 
-  // Benutzer dropdown befüllen
+  // 1. Benutzer laden
   const users = await fetchUsers();
   const uSel = $('#uSel');
-  if (uSel) {
-    uSel.innerHTML = users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+
+  if (uSel && users && users.length > 0) {
+    // Dropdown befüllen
+    uSel.innerHTML = users.map(u => `<option value="${u.id || u.name}">${u.name}</option>`).join('');
     uSel.addEventListener('change', loadDashboard);
+
+    // 2. Erst wenn Benutzer da sind, den Datumsbereich und das Dashboard triggern
+    setDateRange(30);
+  } else {
+    if (uSel) uSel.innerHTML = '<option value="">Keine Benutzer gefunden</option>';
+    $('#loadBox').textContent = 'Konnte keine Benutzer vom Server laden. Bitte Backend prüfen.';
+    $('#loadBox').style.display = 'block';
   }
 
   // Zeitbereichs-Buttons Event Listener
@@ -81,12 +96,73 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#goBtn')?.addEventListener('click', loadDashboard);
 
   $('#csvBtn')?.addEventListener('click', () => {
-    exportToCSV(state.lastData, `gewichtsexport_${$('#uSel').value}.csv`);
+    if (state.lastData) {
+      exportToCSV(state.lastData, `gewichtsexport_${$('#uSel').value}.csv`);
+    }
   });
-
-  // Standardmäßig die letzten 30 Tage laden
-  setDateRange(30);
 });
+
+/**
+ * Holt die Benutzerliste vom FastAPI-Backend
+ */
+async function fetchUsers() {
+  try {
+    const response = await fetch('/api/appstatus');
+    if (!response.ok) throw new Error(`HTTP Fehler! Status: ${response.status}`);
+
+    const data = await response.json();
+    console.log("📥 Empfangene User-Daten:", data);
+
+    // Flexibel auswerten: Falls Objekt mit .users-Attribut, sonst reines Array, sonst leere Liste
+    if (data && data.users) return data.users;
+    if (Array.isArray(data)) return data;
+    return [];
+  } catch (error) {
+    console.error('❌ Fehler beim Laden der Benutzer:', error);
+    return [];
+  }
+}
+
+/**
+ * Holt die Dashboard-Daten für einen spezifischen Benutzer und Zeitraum
+ */
+async function fetchDashboardData(userId, fromDate, toDate) {
+  try {
+    let url = `/api/dashboard?user_id=${userId}`;
+    if (fromDate) url += `&from=${fromDate}`;
+    if (toDate) url += `&to=${toDate}`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP Fehler! Status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('❌ Fehler beim Laden der Dashboard-Daten:', error);
+    return null;
+  }
+}
+
+/**
+ * Exportiert die aktuellen Tabellendaten als CSV-Datei
+ */
+function exportToCSV(data, filename) {
+  if (!data || data.length === 0) return;
+
+  const headers = Object.keys(data[0]).join(',');
+  const rows = data.map(row =>
+    Object.values(row).map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')
+  );
+
+  const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+export { fetchUsers, fetchDashboardData, exportToCSV };
 
 // ─── App Info ───────────────────────────────────────────
 
