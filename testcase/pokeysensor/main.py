@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 import json
+from datetime import datetime
 
 from manager import PoKeysManager  # <- deine bestehende Klasse
 
@@ -39,11 +40,29 @@ def dashboard():
     manager.update_sensors()
     sensors = manager.sensors
 
-    # Nur aktive Sensoren (Verbrauch > 0)
-    active = [s for s in sensors.values() if s.verbrauch_kwh > 0]
+    # Nur aktive Sensoren
+    # active = [s for s in sensors.values() if s.verbrauch_kwh > 0]
+    # active = [s for s in sensors.values() if s.watt > 0]
+    # active = [s for s in sensors.values() if s.total_kwh > 0]
+
+    # Alle Sensoren
+    # active = list(sensors.values())
+
+    # KORRIGIERT: Blende "Reserve" NUR aus, wenn sie noch 0 kWh hat.
+    # Wenn sie Werte hat (> 0), wird sie automatisch eingeblendet!
+    active = [
+        s for s in sensors.values()
+        if s.total_kwh > 0 and not ("reserve" in (s.name or "").lower() and s.total_kwh == 0)
+    ]
 
     labels = [s.name for s in active]
     watts = [s.watt for s in active]
+
+    # Farb-Zuordnung für die EU-Energieklassen
+    KLASSE_FARBEN = {
+        "A": "#009640", "B": "#4cb123", "C": "#c3d100",
+        "D": "#ffcc00", "E": "#ff9900", "F": "#ff3300", "G": "#d3001e"
+    }
 
     html = f"""
     <html>
@@ -216,22 +235,40 @@ def dashboard():
             '<span class="badge-off">OFFLINE</span>'
         )
 
+        # Aktuelle Hintergrundfarbe für das Energie-Label ermitteln
+        energie_farbe = KLASSE_FARBEN.get(getattr(s, "energieklasse", "A"), "#777")
+
         html += f"""
             <div class="card">
                 <div class="icon">{icon}</div>
-                <h3>{s.name} {badge}</h3>
-
+                <h3>{s.id}: {s.name} {badge}</h3>
                 <div class="row">
-                    <span class="label">Watt</span>
-                    <span class="value-strong">{s.watt}</span>
+                    <span class="label">Geräte:</span>
+                    <span class="value-strong" style="white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: inline-block;
+                        max-width: 180px;
+                        text-align: right;">{", ".join(d.capitalize() for d in s.devices)}</span>
                 </div>
                 <div class="row">
-                    <span class="label">Δ kWh</span>
-                    <span>{s.verbrauch_kwh:.4f}</span>
+                    <span class="label">Energieklasse</span>
+                    <span class="value-strong" style="background-color: {energie_farbe};
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        display: inline-block;
+                        min-width: 24px;
+                        text-align: center;">{getattr(s, "energieklasse", "A")}</span>
                 </div>
                 <div class="row">
-                    <span class="label">Total kWh</span>
-                    <span>{s.total_kwh:.3f}</span>
+                    <span class="label">Aktuelle Leistung</span>
+                    <span class="value-strong">{s.watt} W</span>
+                </div>
+                <div class="row">
+                    <span class="label">Aktueller Verbrauch</span>
+                    <span>{s.verbrauch_kwh:.3f} kWh</span>
                 </div>
                 <div class="row">
                     <span class="label">Kosten</span>
@@ -243,7 +280,7 @@ def dashboard():
                 </div>
                 <div class="row">
                     <span class="label">Trend</span>
-                    <span>{s.kwh_pro_stunde:.4f} kWh/h</span>
+                    <span>{s.kwh_pro_stunde:.3f} kWh/h</span>
                 </div>
                 <div class="row">
                     <span class="label">Prognose Tag</span>
@@ -253,13 +290,25 @@ def dashboard():
                     <span class="label">Prognose Jahr</span>
                     <span>{s.prognose_jahr:.2f} €</span>
                 </div>
+                <div class="row">
+                    <span class="label">Raum</span>
+                    <span>{s.room}</span>
+                </div>
+                <div class="row">
+                    <span class="label">Sensor</span>
+                    <span>{s.model} Pin:{s.pin}</span>
+                </div>
+                <div class="row">
+                    <span class="label">Online</span>
+                    <span>{datetime.fromtimestamp(s.update_ts).strftime("%d.%m.%Y %H:%M") if s.update_ts and s.update_ts != "--" and s.update_ts != 0 else "--"}</span>
+                </div>
             </div>
         """
 
+    # Schließende Tags für das Grid, den Body und das HTML-Dokument
     html += """
         </div>
     </body>
     </html>
     """
-
     return html
