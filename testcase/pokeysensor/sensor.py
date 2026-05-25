@@ -24,6 +24,9 @@ class S0Sensor:
         self.impulse = impulse
         self.faktor = 100 / impulse
 
+        self.interface = ""
+        self.pin = 0
+
         self.model = None
         self.room = None
         self.devices = []
@@ -44,7 +47,6 @@ class S0Sensor:
         self.sekunden_pro_impuls = 0.0
 
         self.online = False
-        self.status = ""
         self.last_online_ts = 0
 
         self.watt_ma = MovingAverage(size=5)
@@ -138,11 +140,14 @@ class S0Sensor:
         return {
             "name": self.name,
             "model": self.model,
+            "interface": self.interface,
+            "pin": self.pin,
             "room": self.room,
             "devices": self.devices,
             "total_kwh": self.total_kwh,
             "kwh": self.verbrauch_kwh,
             "watt": self.watt,
+            "watt_ma": self.watt_ma,
             "kosten": self.kosten,
             "co2": self.co2,
             "trend_kwh_h": self.kwh_pro_stunde,
@@ -155,9 +160,21 @@ class S0Sensor:
             "last_online_ts": self.last_online_ts
         }
 
+    def get_settings(self):
+        return {
+            key: value
+            for key, value in self.__dict__.items()
+            if not key.startswith("_") and key != "watt_ma"
+        }
+
     def load_dict(self, data):
-        self.total_kwh = data["kwh"]
-        self.prev_kwh = data["kwh"]
-        self.watt = data["watt"]
-        self.last_ts = data["ts"]
+        # Absoluter Zählerstand laden
+        self.total_kwh = data.get("total_kwh", self.total_kwh)
+        self.prev_kwh = self.total_kwh
+
+        # Online-Status laden
+        self.online = data.get("online", False)
+        self.last_online_ts = data.get("last_online_ts", 0)
+
+        # Sensor ist initialisiert
         self.initialized = True

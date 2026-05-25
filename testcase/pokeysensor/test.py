@@ -16,6 +16,7 @@ def main():
     while True:
 
         manager.update_sensors()
+
         print(f"\nMessdaten :[{manager.letztes_update}]\n")
         daten = manager.get_all_data()
 
@@ -33,6 +34,8 @@ def main():
                     f"{info.get('watt'):>8} "
                     f"{info.get('faktor'):>8}"
                 )
+        print("\n")
+        manager.print_all_sensor_settings()
 
         time.sleep(60)
 
