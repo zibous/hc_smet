@@ -1,290 +1,290 @@
 {
   "S01": {
-    "total_kwh": 95.616,
-    "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.068367,
+    "total_kwh": 95.617,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.513536,
     "online": true
   },
   "S02": {
     "total_kwh": 206.08,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0684164,
+    "last_online_ts": 1779698354.5135942,
     "online": true
   },
   "S03": {
     "total_kwh": 5.316,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.068432,
+    "last_online_ts": 1779698354.513615,
     "online": true
   },
   "S04": {
-    "total_kwh": 136.423,
-    "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0684454,
+    "total_kwh": 136.424,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.5136874,
     "online": true
   },
   "S05": {
     "total_kwh": 358.528,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0684593,
+    "last_online_ts": 1779698354.513709,
     "online": true
   },
   "S06": {
-    "total_kwh": 30.294,
-    "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0684707,
+    "total_kwh": 30.295,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.513724,
     "online": true
   },
   "S07": {
     "total_kwh": 195.976,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0684822,
+    "last_online_ts": 1779698354.5137427,
     "online": true
   },
   "S08": {
-    "total_kwh": 728.864,
-    "verbrauch_kwh": 0.002,
-    "last_online_ts": 1779698294.0684936,
+    "total_kwh": 728.865,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.5137568,
     "online": true
   },
   "S09": {
     "total_kwh": 29.074,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.068514,
+    "last_online_ts": 1779698354.513775,
     "online": true
   },
   "S10": {
-    "total_kwh": 178.12,
-    "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0685253,
+    "total_kwh": 178.121,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.513788,
     "online": true
   },
   "S11": {
     "total_kwh": 594.125,
-    "verbrauch_kwh": 0.001,
-    "last_online_ts": 1779698294.0685384,
+    "verbrauch_kwh": 0.0,
+    "last_online_ts": 1779698354.513804,
     "online": true
   },
   "S12": {
-    "total_kwh": 134.56,
-    "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.068556,
+    "total_kwh": 134.561,
+    "verbrauch_kwh": 0.001,
+    "last_online_ts": 1779698354.5138175,
     "online": true
   },
   "S13": {
     "total_kwh": 349.68,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0685673,
+    "last_online_ts": 1779698354.513834,
     "online": true
   },
   "S15": {
     "total_kwh": 59.021,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0685787,
+    "last_online_ts": 1779698354.513848,
     "online": true
   },
   "S35": {
     "total_kwh": 282.63125,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1744385,
+    "last_online_ts": 1779698354.619324,
     "online": true
   },
   "S16": {
     "total_kwh": 17.529,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0685892,
+    "last_online_ts": 1779698354.513861,
     "online": true
   },
   "S17": {
     "total_kwh": 20.246,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0686004,
+    "last_online_ts": 1779698354.513873,
     "online": true
   },
   "S19": {
     "total_kwh": 135.868,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0686114,
+    "last_online_ts": 1779698354.5138857,
     "online": true
   },
   "S20": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0686738,
+    "last_online_ts": 1779698354.5138981,
     "online": true
   },
   "S25": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.068727,
+    "last_online_ts": 1779698354.5139558,
     "online": true
   },
   "S21": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0686858,
+    "last_online_ts": 1779698354.5139098,
     "online": true
   },
   "S22": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0686963,
+    "last_online_ts": 1779698354.513921,
     "online": true
   },
   "S23": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0687068,
+    "last_online_ts": 1779698354.5139327,
     "online": true
   },
   "S29": {
     "total_kwh": 87.321,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1743412,
+    "last_online_ts": 1779698354.6192324,
     "online": true
   },
   "S30": {
     "total_kwh": 68.792,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.174356,
+    "last_online_ts": 1779698354.6192477,
     "online": true
   },
   "S37": {
     "total_kwh": 70.44625,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1744647,
+    "last_online_ts": 1779698354.619349,
     "online": true
   },
   "S32": {
-    "total_kwh": 2361.563,
-    "verbrauch_kwh": 0.004,
-    "last_online_ts": 1779698294.174382,
+    "total_kwh": 2361.566,
+    "verbrauch_kwh": 0.003,
+    "last_online_ts": 1779698354.6192741,
     "online": true
   },
   "S33": {
     "total_kwh": 265.371,
-    "verbrauch_kwh": 0.001,
-    "last_online_ts": 1779698294.1744049,
+    "verbrauch_kwh": 0.0,
+    "last_online_ts": 1779698354.6192977,
     "online": true
   },
   "S34": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1744246,
+    "last_online_ts": 1779698354.6193116,
     "online": true
   },
   "S36": {
     "total_kwh": 179.615,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.174451,
+    "last_online_ts": 1779698354.6193366,
     "online": true
   },
   "S24": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.0687168,
+    "last_online_ts": 1779698354.5139444,
     "online": true
   },
   "S26": {
     "total_kwh": 283.749,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.174259,
+    "last_online_ts": 1779698354.6191459,
     "online": true
   },
   "S27": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1743104,
+    "last_online_ts": 1779698354.6191993,
     "online": true
   },
   "S28": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1743274,
+    "last_online_ts": 1779698354.6192179,
     "online": true
   },
   "S31": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1743696,
+    "last_online_ts": 1779698354.6192617,
     "online": true
   },
   "S38": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.174477,
+    "last_online_ts": 1779698354.6193612,
     "online": true
   },
   "S39": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.174489,
+    "last_online_ts": 1779698354.6193726,
     "online": true
   },
   "S40": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745014,
+    "last_online_ts": 1779698354.6193843,
     "online": true
   },
   "S41": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745129,
+    "last_online_ts": 1779698354.6193955,
     "online": true
   },
   "S42": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745248,
+    "last_online_ts": 1779698354.6194072,
     "online": true
   },
   "S43": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745362,
+    "last_online_ts": 1779698354.6194181,
     "online": true
   },
   "S44": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745484,
+    "last_online_ts": 1779698354.6194296,
     "online": true
   },
   "S45": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745603,
+    "last_online_ts": 1779698354.6194408,
     "online": true
   },
   "S46": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745722,
+    "last_online_ts": 1779698354.619452,
     "online": true
   },
   "S47": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745834,
+    "last_online_ts": 1779698354.6194627,
     "online": true
   },
   "S48": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1745954,
+    "last_online_ts": 1779698354.6194742,
     "online": true
   },
   "S49": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1746066,
+    "last_online_ts": 1779698354.619485,
     "online": true
   },
   "S50": {
     "total_kwh": 0.0,
     "verbrauch_kwh": 0.0,
-    "last_online_ts": 1779698294.1746447,
+    "last_online_ts": 1779698354.6194959,
     "online": true
   }
 }
