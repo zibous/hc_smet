@@ -1,21 +1,33 @@
 import time
 import yaml
 import os
+import sys
+from pathlib import Path
+import logging
 
 from sensor import S0Sensor
 from storage import StorageHandler
 from network import NetworkClient
 from pokeydevice import PoKeysDevice
 
+# Projektwurzel ermitteln
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT))
+
+from app.core.app_config import settings
+logger = logging.getLogger(__name__)
+
+def parse_range(text: str) -> tuple[int, int]:
+    start, end = map(int, text.split("-"))
+    return start, end
 
 class PoKeysManager:
 
     def __init__(self):
-        self.devices = [
-            PoKeysDevice("poKey64", "10.1.1.64", 1, 25),
-            PoKeysDevice("poKey65", "10.1.1.65", 26, 50),
-        ]
 
+        self.settings = settings
+        self.devices = []   # ← WICHTIG: immer definieren!
+        self._load_devices()
         self.network = NetworkClient()
 
         filename = os.path.splitext(os.path.basename(__file__))[0] + ".json"
@@ -50,9 +62,8 @@ class PoKeysManager:
 
         # ---------------- Pins zuordnen ----------------
         self.pin_order = [
-            0, 1, 4, 5, 8, 10, 14, 15, 18, 19,
-            20, 21, 22, 23, 24, 25, 26, 27,
-            40, 41, 42, 43, 45, 47, 48,
+            int(pin.strip())
+            for pin in settings.POKEYS_DEVICE2_PINS.split(",")
         ]
 
         for dev in self.devices:
@@ -64,7 +75,22 @@ class PoKeysManager:
         # ---------------- Persistente Daten laden ----------------
         self.storage.load(self.sensors)
 
+
     # ----------------------------------------------------------------------
+
+    def _load_devices(self):
+        idx = 1
+        while hasattr(self.settings, f"POKEYS_DEVICE{idx}_NAME"):
+            name = getattr(self.settings, f"POKEYS_DEVICE{idx}_NAME")
+            ip   = getattr(self.settings, f"POKEYS_DEVICE{idx}_IP")
+            rng  = getattr(self.settings, f"POKEYS_DEVICE{idx}_SENSORS")
+            start, end = map(int, rng.split("-"))
+            logger.info(f"Device {name}, {ip} ready")
+            self.devices.append(
+                PoKeysDevice(name, ip, start, end)
+            )
+            idx += 1
+
 
     def update_sensors(self):
         self.letztes_update = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -72,6 +98,8 @@ class PoKeysManager:
         for dev in self.devices:
             try:
                 result = self.network.fetch(dev.ip)
+                logger.info(f"Loaded device data von: {dev.ip}, Ergebnisse neu geladen.")
+
             except Exception:
                 dev.mark_offline()
                 for sid in dev.sensors:
@@ -90,17 +118,18 @@ class PoKeysManager:
             for s in data.get("sensors", []):
                 sid = s.get("ID")
                 val = s.get("Val")
-
                 if sid not in self.sensors:
                     continue
-
                 sensor = self.sensors[sid]
                 sensor.online = True
                 sensor.last_online_ts = time.time()
-
                 try:
+                    # Neue Daten übertragen an sensor
+                    logger.debug(f"Update des Sensors {sid} mit neuen Werten")
                     sensor.update(float(val))
+
                 except Exception:
+                    logger.error(f"Fehler beim Update des Sensors {sid}")
                     continue
 
         # Persistenz

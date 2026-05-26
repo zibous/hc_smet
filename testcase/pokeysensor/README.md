@@ -251,6 +251,25 @@ Repräsentiert einen einzelnen S0‑Sensor:
     last_online_ts      : 1779696242.079076
 ```
 
+```json
+    "S32": {
+        "total_kwh": 2362.037,
+        "verbrauch_kwh": 0.003,
+        "watt": 199,
+        "kwh_pro_stunde": 0.17890337916552998,
+        "kosten": 0.02496,
+        "co2": 39.52,
+        "prognose_tag": 1.15,
+        "prognose_jahr": 420.47,
+        "sekunden_pro_impuls": 18.09,
+        "energieklasse": "G",
+        "gesamte_laufzeit_sekunden": 1872.0437338352203,
+        "gesamter_historischer_verbrauch": 0.10400000000000004,
+        "last_online_ts": 1779706850.8130202,
+        "online": true,
+        "ts": 1779706850.8130212
+    },
+```
 
 ### network.py
 

@@ -1,5 +1,12 @@
 import time
+import sys
+from pathlib import Path
 
+# Projektwurzel ermitteln
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT))
+
+from app.core.app_config import settings
 
 class MovingAverage:
     def __init__(self, size=5):
@@ -19,6 +26,7 @@ class MovingAverage:
 
 class S0Sensor:
     def __init__(self, name, impulse):
+
         self.name = name
         self.impulse = impulse
         self.faktor = 100 / impulse
@@ -40,7 +48,7 @@ class S0Sensor:
 
         # Zusatzwerte
         self.kosten = 0.0
-        self.co2 = 0.0
+        self.co2 = 0
         self.kwh_pro_stunde = 0.0
         self.prognose_tag = 0.0
         self.prognose_jahr = 0.0
@@ -107,10 +115,12 @@ class S0Sensor:
 
     # --------------------------------------------------------------
     def calcdata(self, dt: float):
-        preis = 0.24
-        co2 = 380.0
 
-        ## TODO: im json speichern, da sonst bei eine restart der Anendung das nicht stimmt.
+        preis = list(settings.STROMPREISE.values())[-1]
+
+
+        ## TODO: prüfen im json speichern, da sonst bei eine
+        ## restart der Anendung das nicht stimmt.
 
         # --- 1. Laufzeit-Erfassung für die Langzeit-Prognose (KORRIGIERT GEGEN SPEICHER-ERASURE) ---
         if not hasattr(self, 'gesamte_laufzeit_sekunden'):
@@ -142,7 +152,7 @@ class S0Sensor:
 
         # --- 3. Aktuelle IST-Kosten und CO2 (Basierend auf dem bisherigen Gesamtverbrauch) ---
         self.kosten = round(self.gesamter_historischer_verbrauch * preis, 6)
-        self.co2 = round(self.gesamter_historischer_verbrauch * co2, 6)
+        self.co2 = round(self.gesamter_historischer_verbrauch * settings.CO2_WERT, 6)
 
         # --- 4. KORRIGIERTE PROGNOSE (Historischer Durchschnitt statt Momentanwert) ---
         # Wir berechnen, wie viel das Gerät seit Messbeginn im Schnitt PRO STUNDE verbraucht hat (inkl. Pausen)
@@ -166,17 +176,18 @@ class S0Sensor:
 
         # --- 6. ERWEITERT: Energieklasse aus der stabilen Jahresprognose ableiten ---
         jahr_kwh = echter_historischer_schnitt_pro_stunde * 8760
-        if jahr_kwh < 100:
+
+        if jahr_kwh < settings.LIMIT_CLASS_A:
             self.energieklasse = "A"
-        elif jahr_kwh < 150:
+        elif jahr_kwh < settings.LIMIT_CLASS_B:
             self.energieklasse = "B"
-        elif jahr_kwh < 200:
+        elif jahr_kwh < settings.LIMIT_CLASS_C:
             self.energieklasse = "C"
-        elif jahr_kwh < 300:
+        elif jahr_kwh < settings.LIMIT_CLASS_D:
             self.energieklasse = "D"
-        elif jahr_kwh < 400:
+        elif jahr_kwh < settings.LIMIT_CLASS_E:
             self.energieklasse = "E"
-        elif jahr_kwh < 500:
+        elif jahr_kwh < settings.LIMIT_CLASS_F:
             self.energieklasse = "F"
         else:
             self.energieklasse = "G"

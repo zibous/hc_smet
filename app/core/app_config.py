@@ -104,11 +104,11 @@ class DeviceConfig(BaseModel):
 # =================================================================
 class Settings(BaseSettings):
     """Zentrale Konfiguration mit Pydantic Settings.
-    
+
     Liest aus .env und bietet typsichere Properties.
     100% rückwärtskompatibel zur alten Struktur.
     """
-    
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",
@@ -143,6 +143,13 @@ class Settings(BaseSettings):
     STROMPREISE: dict[str, float] = Field(
         default_factory=lambda: {"2026": 0.24}
     )
+    CO2_WERT: int = 380
+    LIMIT_CLASS_A: int= 100
+    LIMIT_CLASS_B: int=150
+    LIMIT_CLASS_C: int=200
+    LIMIT_CLASS_D: int=300
+    LIMIT_CLASS_E: int=400
+    LIMIT_CLASS_F: int=500
 
     # =================================================================
     # DATABASE
@@ -244,10 +251,18 @@ class Settings(BaseSettings):
     POKEYS_DEVICE1_NAME: str = "poKey64"
     POKEYS_DEVICE1_IP: str = "10.1.1.64"
     POKEYS_DEVICE1_SENSORS: str = "1-25"
+    POKEYS_DEVICE1_PINS: str = Field(
+        default="0,1,4,5,8,10,14,15,18,19,20,21,22,23,24,25,26,27,40,41,42,43,45,47,48"
+    )
+
     POKEYS_DEVICE2_ID: str = "IF65"
     POKEYS_DEVICE2_NAME: str = "poKey65"
     POKEYS_DEVICE2_IP: str = "10.1.1.65"
     POKEYS_DEVICE2_SENSORS: str = "26-50"
+    POKEYS_DEVICE2_PINS: str = Field(
+        default="0,1,4,5,8,10,14,15,18,19,20,21,22,23,24,25,26,27,40,41,42,43,45,47,48"
+    )
+
     SENSOR_PER_DEVICE: int = 25
 
     # =================================================================
@@ -292,7 +307,7 @@ class Settings(BaseSettings):
     @cached_property
     def sensor_devices(self) -> dict[str, dict[str, Any]]:
         """Legacy-kompatibles Dictionary für Sensor-Devices.
-        
+
         Returns:
             {
                 "pokey64": {
@@ -311,7 +326,7 @@ class Settings(BaseSettings):
             sensor_start = 1
             if "-" in dev.sensors:
                 sensor_start = int(dev.sensors.split("-")[0])
-            
+
             result[dev.name.lower()] = {
                 "id": dev.id,
                 "name": dev.name,

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict,field_validator
 from pathlib import Path
 
 class SettingsSchema(BaseModel):
@@ -52,10 +52,12 @@ class SettingsSchema(BaseModel):
     POKEYS_DEVICE1_NAME: str
     POKEYS_DEVICE1_IP: str
     POKEYS_DEVICE1_SENSORS: str
+
     POKEYS_DEVICE2_ID: str
     POKEYS_DEVICE2_NAME: str
     POKEYS_DEVICE2_IP: str
     POKEYS_DEVICE2_SENSORS: str
+
     SENSOR_PER_DEVICE: int
 
     # API CONFIGURATION
