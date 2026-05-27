@@ -64,6 +64,7 @@ class NetworkClient:
 
             try:
                 data = json.loads(response.data.decode("utf-8"))
+
             except json.JSONDecodeError:
                 logger.warning(f"{ip}: Ungültiges JSON")
                 return {"online": False}
