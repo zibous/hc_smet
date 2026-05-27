@@ -13,10 +13,10 @@ from app.core.logging_setup import setup_logging
 from app.api.base import router as base_router
 from app.api.dashboard import router as dashboard_router
 from app.api.dashboard2 import router as dashboard2_router
-from app.api.parsdecoder import router as parsdecoder_router
 from app.api.settingsdata import router as settings_router
 
 from app.infrastructure.database.dbconnect import Database
+from app.services.pokeys_manager import PoKeysManager, start_polling_thread
 
 # Logging Setup (nur einmal!)
 setup_logging()
@@ -30,6 +30,7 @@ logger.info("Start Application")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Lifespan: Initialisiere Datenbank-Infrastruktur...")
+    logger.info(f"Lifespan: POKEY_SERVICE Modus = {settings.POKEY_SERVICE}")
 
     # Datenbank-Singleton mit dem dynamischen Pfad aus den Settings erzeugen
     db_path = settings.database_path / settings.database_name
@@ -51,22 +52,47 @@ async def lifespan(app: FastAPI):
     finally:
         conn.close()
 
-    # Überlapp-Schutz: Wenn sensor_state.json fehlt (frischer Import),
-    # die letzte Import-Stunde löschen falls sie in der aktuellen Stunde liegt.
-    from app.api.parsdecoder import _shared_store
-    json_exists = _shared_store.file_path.exists()
-    logger.info(f"Lifespan: sensor_state.json existiert: {json_exists}")
-    if not json_exists:
-        _shared_store._cleanup_import_hour()
-
-    # MQTT Publisher starten
+    # --- MODUS-WEICHE: GET vs POST ---
+    pokeys_manager = None
+    polling_stop_event = None
     mqtt_publisher = None
-    if settings.MQTT_ENABLED:
-        from app.services.mqtt_publisher import MQTTPublisher
-        mqtt_publisher = MQTTPublisher(_shared_store)
-        mqtt_publisher.start()
 
-    # Webhook Publisher starten
+    if settings.POKEY_SERVICE.upper() == "GET":
+        # ============================================================
+        # GET-MODUS: PoKeysManager + Polling-Thread
+        # ============================================================
+        logger.info("Lifespan: Starte GET-Modus (NetworkClient Polling)...")
+        pokeys_manager = PoKeysManager()
+        polling_stop_event = start_polling_thread(
+            pokeys_manager, interval=settings.FETCH_INTERVAL
+        )
+        # Manager global verfügbar machen
+        app.state.pokeys_manager = pokeys_manager
+
+        # MQTT Publisher mit PoKeysManager als Datenquelle
+        if settings.MQTT_ENABLED:
+            from app.services.mqtt_publisher import MQTTPublisher
+            mqtt_publisher = MQTTPublisher(pokeys_manager)
+            mqtt_publisher.start()
+
+    else:
+        # ============================================================
+        # POST-MODUS: Legacy SensorStore (bisheriges Verhalten)
+        # ============================================================
+        logger.info("Lifespan: Starte POST-Modus (Legacy parsdecoder)...")
+        from app.api.parsdecoder import _shared_store
+        json_exists = _shared_store.file_path.exists()
+        logger.info(f"Lifespan: sensor_state.json existiert: {json_exists}")
+        if not json_exists:
+            _shared_store._cleanup_import_hour()
+
+        # MQTT Publisher mit SensorStore als Datenquelle
+        if settings.MQTT_ENABLED:
+            from app.services.mqtt_publisher import MQTTPublisher
+            mqtt_publisher = MQTTPublisher(_shared_store)
+            mqtt_publisher.start()
+
+    # Webhook Publisher starten (unabhängig vom Modus)
     from app.core.webhook import WebhookPublisher
     webhook_publisher = WebhookPublisher()
     webhook_publisher.start()
@@ -75,6 +101,9 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+    if polling_stop_event:
+        polling_stop_event.set()
+        logger.info("Lifespan: Polling-Thread gestoppt.")
     webhook_publisher.stop()
     if mqtt_publisher:
         mqtt_publisher.stop()
@@ -122,7 +151,13 @@ app.include_router(dashboard_router)
 
 app.include_router(dashboard2_router)
 
-app.include_router(parsdecoder_router)
+# POST-Endpoint NUR im POST-Modus registrieren (Kollisionsschutz)
+if settings.POKEY_SERVICE.upper() != "GET":
+    from app.api.parsdecoder import router as parsdecoder_router
+    app.include_router(parsdecoder_router)
+    logger.info("Router: parsdecoder (POST) registriert.")
+else:
+    logger.info("Router: parsdecoder (POST) DEAKTIVIERT (GET-Modus aktiv).")
 
 app.include_router(settings_router)
 

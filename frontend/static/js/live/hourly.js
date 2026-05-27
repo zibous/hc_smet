@@ -3,7 +3,7 @@
  * Zeigt die letzten 24h als Chart und Tabelle
  */
 
-const API_URL = '../api/dashboard2/hourly';
+const API_URL = 'api/dashboard2/hourly';
 const chartCanvas = document.getElementById('hourlyChart');
 const tableWrap = document.getElementById('hourly-table-wrap');
 const refreshInfo = document.getElementById('hourly-refresh');

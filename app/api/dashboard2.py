@@ -20,43 +20,106 @@ STRUCTURE = house.STRUCTURE
 # =================================================================
 @router.get("/live/sensors")
 async def get_live_sensors():
-    """Liefert die aktuellen Sensorwerte aus dem RAM-Speicher (sensor_state.json)."""
-    from app.api.parsdecoder import _shared_store
+    """Liefert die aktuellen Sensorwerte aus dem RAM-Speicher.
 
-    store_data = _shared_store.get_all()
+    Im GET-Modus: Daten vom PoKeysManager (S0Sensor-Objekte)
+    Im POST-Modus: Daten vom SensorStore (sensor_state.json)
+    """
     sensors_info = STRUCTURE.get("sensors", {})
     rooms_info = STRUCTURE.get("rooms", {})
     areas_info = STRUCTURE.get("areas", {})
 
     result = []
-    for sensor_id in sorted(store_data.keys()):
-        entry = store_data[sensor_id]
-        meta = sensors_info.get(sensor_id, {})
-        room_id = meta.get("room", "")
-        room_data = rooms_info.get(room_id, {})
-        room_name = room_data.get("name", "-")
-        area_id = room_data.get("area", "")
-        area_name = areas_info.get(area_id, {}).get("name", "-")
 
-        # nur aktive Sensoren anzeigen
-        if entry.current <= 0:
-            continue
+    if settings.POKEY_SERVICE.upper() == "GET":
+        # GET-Modus: PoKeysManager
+        from app.services.pokeys_manager import PoKeysManager
+        # Manager wird über app.state bereitgestellt, hier Fallback via Import
+        # Da wir keinen Request-Kontext haben, nutzen wir den globalen Zugriff
+        import app.main as main_module
+        manager: PoKeysManager | None = getattr(
+            getattr(main_module, "app", None), "state", None
+        )
+        if manager and hasattr(manager, "pokeys_manager"):
+            manager = manager.pokeys_manager
+        else:
+            manager = None
 
-        result.append({
-            "id": sensor_id,
-            "name": meta.get("name", sensor_id),
-            "room": room_name,
-            "area": area_name,
-            "area_id": area_id,
-            "current": round(entry.current, 4),
-            "last": round(entry.last, 4),
-            "delta": round(entry.delta, 4),
-            "timestamp": entry.timestamp,
-        })
+        if manager is None:
+            return JSONResponse(
+                content={"error": "PoKeysManager nicht initialisiert"},
+                status_code=503,
+            )
+
+        all_data = manager.get_all_data()
+        for sensor_id in sorted(all_data.keys()):
+            info = all_data[sensor_id]
+            if info.get("total_kwh", 0) <= 0:
+                continue
+
+            meta = sensors_info.get(sensor_id, {})
+            room_id = meta.get("room", "")
+            room_data = rooms_info.get(room_id, {})
+            room_name = room_data.get("name", "-")
+            area_id = room_data.get("area", "")
+            area_name = areas_info.get(area_id, {}).get("name", "-")
+
+            result.append({
+                "id": sensor_id,
+                "name": info.get("name", sensor_id),
+                "room": room_name,
+                "area": area_name,
+                "area_id": area_id,
+                "current": round(info.get("total_kwh", 0), 4),
+                "last": round(info.get("total_kwh", 0) - info.get("verbrauch_kwh", 0), 4),
+                "delta": round(info.get("verbrauch_kwh", 0), 4),
+                "watt": info.get("watt", 0),
+                "kosten": info.get("kosten", 0.0),
+                "co2": info.get("co2", 0.0),
+                "prognose_tag": info.get("prognose_tag", 0.0),
+                "prognose_jahr": info.get("prognose_jahr", 0.0),
+                "energieklasse": info.get("energieklasse", "A"),
+                "model": info.get("model", "-"),
+                "devices": info.get("devices", []),
+                "status": info.get("status", "OFF"),
+                "online": info.get("online", False),
+                "timestamp": int(info.get("ts", 0)),
+            })
+
+    else:
+        # POST-Modus: Legacy SensorStore
+        from app.api.parsdecoder import _shared_store
+
+        store_data = _shared_store.get_all()
+        for sensor_id in sorted(store_data.keys()):
+            entry = store_data[sensor_id]
+            meta = sensors_info.get(sensor_id, {})
+            room_id = meta.get("room", "")
+            room_data = rooms_info.get(room_id, {})
+            room_name = room_data.get("name", "-")
+            area_id = room_data.get("area", "")
+            area_name = areas_info.get(area_id, {}).get("name", "-")
+
+            # nur aktive Sensoren anzeigen
+            if entry.current <= 0:
+                continue
+
+            result.append({
+                "id": sensor_id,
+                "name": meta.get("name", sensor_id),
+                "room": room_name,
+                "area": area_name,
+                "area_id": area_id,
+                "current": round(entry.current, 4),
+                "last": round(entry.last, 4),
+                "delta": round(entry.delta, 4),
+                "timestamp": entry.timestamp,
+            })
 
     return JSONResponse(content={
         "timestamp": int(time.time()),
         "count": len(result),
+        "mode": settings.POKEY_SERVICE.upper(),
         "sensors": result
     })
 
@@ -170,20 +233,15 @@ async def get_analytics_summary():
 # =================================================================
 @router.get("/verify")
 async def verify_scale_factor():
-    """Vergleicht die Live-Deltas (SensorStore) mit den DB-Stundenwerten.
+    """Vergleicht die Live-Deltas mit den DB-Stundenwerten.
 
     Zeigt für die aktuelle Stunde:
-    - Raw-Delta (ohne Scale): Was der SensorStore berechnet
-    - Scaled-Delta: Was in die DB geschrieben wird (× SENSOR_SCALE_FACTOR)
+    - Raw-Delta: Was berechnet wird
     - DB-Wert: Was tatsächlich in hourly_values steht
     - Scale-Factor: Der aktuelle Faktor aus der .env
     """
-    from app.api.parsdecoder import _shared_store
-
     now = int(time.time())
     current_hour = (now // 3600) * 3600
-
-    store_data = _shared_store.get_all()
     scale = settings.SENSOR_SCALE_FACTOR
 
     # DB-Werte für aktuelle Stunde
@@ -199,28 +257,56 @@ async def verify_scale_factor():
             db_values[sid] = {"consumption": consumption, "total": total}
 
     sensors = []
-    for sensor_id in sorted(store_data.keys()):
-        entry = store_data[sensor_id]
-        if entry.current == 0:
-            continue
 
-        raw_delta = entry.delta
-        scaled_delta = round(raw_delta * scale, 6)
-        db = db_values.get(sensor_id, {})
+    if settings.POKEY_SERVICE.upper() == "GET":
+        # GET-Modus: Daten vom PoKeysManager
+        import app.main as main_module
+        manager = getattr(
+            getattr(main_module, "app", None), "state", None
+        )
+        if manager and hasattr(manager, "pokeys_manager"):
+            mgr = manager.pokeys_manager
+            all_data = mgr.get_all_data()
+            for sensor_id in sorted(all_data.keys()):
+                info = all_data[sensor_id]
+                if info.get("total_kwh", 0) == 0:
+                    continue
+                db = db_values.get(sensor_id, {})
+                sensors.append({
+                    "id": sensor_id,
+                    "current_total": round(info.get("total_kwh", 0), 2),
+                    "raw_delta": info.get("verbrauch_kwh", 0),
+                    "watt": info.get("watt", 0),
+                    "db_consumption": db.get("consumption"),
+                    "db_total": db.get("total"),
+                })
+    else:
+        # POST-Modus: Legacy SensorStore
+        from app.api.parsdecoder import _shared_store
+        store_data = _shared_store.get_all()
+        for sensor_id in sorted(store_data.keys()):
+            entry = store_data[sensor_id]
+            if entry.current == 0:
+                continue
 
-        sensors.append({
-            "id": sensor_id,
-            "current_total": round(entry.current, 2),
-            "raw_delta": raw_delta,
-            "scaled_delta": scaled_delta,
-            "db_consumption": db.get("consumption"),
-            "db_total": db.get("total"),
-        })
+            raw_delta = entry.delta
+            scaled_delta = round(raw_delta * scale, 6)
+            db = db_values.get(sensor_id, {})
+
+            sensors.append({
+                "id": sensor_id,
+                "current_total": round(entry.current, 2),
+                "raw_delta": raw_delta,
+                "scaled_delta": scaled_delta,
+                "db_consumption": db.get("consumption"),
+                "db_total": db.get("total"),
+            })
 
     return JSONResponse(content={
         "timestamp": now,
         "current_hour": current_hour,
         "scale_factor": scale,
+        "mode": settings.POKEY_SERVICE.upper(),
         "info": "raw_delta × scale_factor = scaled_delta → in DB geschrieben",
         "sensors": sensors
     })

@@ -238,6 +238,23 @@ def init_database():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS sensor_prognosis (
+            sensor_id TEXT PRIMARY KEY,
+            avg_kwh_per_hour REAL,
+            avg_kwh_per_day REAL,
+            prognose_monat_eur REAL,
+            prognose_jahr_eur REAL,
+            prognose_jahr_kwh REAL,
+            energieklasse TEXT,
+            co2_jahr_kg REAL,
+            trend_7d REAL,
+            peak_hour INTEGER,
+            base_load_w REAL,
+            last_update TEXT
+        )
+    """)
+
     cur.execute("CREATE INDEX IF NOT EXISTS idx_sensor_month ON sensor_monthly(sensor_id, year)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_sensor ON sensor_clusters(sensor_id)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_cluster ON sensor_clusters(cluster)")
@@ -410,6 +427,166 @@ def save_to_db(yearly, monthly_data, daily_data, sensor_clusters, target_year=No
 # =========================================================
 # TRIGGER PIPELINE FUNCTION
 # =========================================================
+def calculate_prognosis():
+    """Berechnet Prognose-Werte pro Sensor aus den letzten 30 Tagen hourly_values."""
+    from datetime import timedelta
+
+    logger.info("📊 Berechne Sensor-Prognosen aus historischen Daten...")
+
+    # Strompreis und CO2 aus .env
+    strompreis_raw = os.getenv("STROMPREISE", '{"2026":0.24}')
+    try:
+        import json as _json
+        preise = _json.loads(strompreis_raw.strip("'"))
+        strompreis = list(preise.values())[-1]
+    except Exception:
+        strompreis = 0.24
+
+    co2_wert = float(os.getenv("CO2_WERT", "380"))  # g/kWh
+
+    # Energieklassen-Grenzen
+    limit_a = float(os.getenv("LIMIT_CLASS_A", "100"))
+    limit_b = float(os.getenv("LIMIT_CLASS_B", "150"))
+    limit_c = float(os.getenv("LIMIT_CLASS_C", "200"))
+    limit_d = float(os.getenv("LIMIT_CLASS_D", "300"))
+    limit_e = float(os.getenv("LIMIT_CLASS_E", "400"))
+    limit_f = float(os.getenv("LIMIT_CLASS_F", "500"))
+
+    now = datetime.now(timezone.utc)
+    cutoff_30d = int((now - timedelta(days=30)).timestamp())
+    cutoff_7d = int((now - timedelta(days=7)).timestamp())
+
+    # Alle hourly_values der letzten 30 Tage laden
+    sensor_hours_30d: dict[str, list[tuple[int, float]]] = {}
+    sensor_hours_7d: dict[str, list[float]] = {}
+
+    for sensor, value, ts in stream_hourly_values(target_year=now.year):
+        try:
+            ts_int = int(ts)
+        except (TypeError, ValueError):
+            continue
+
+        if ts_int < cutoff_30d:
+            continue
+
+        if sensor not in sensor_hours_30d:
+            sensor_hours_30d[sensor] = []
+        sensor_hours_30d[sensor].append((ts_int, value))
+
+        if ts_int >= cutoff_7d:
+            if sensor not in sensor_hours_7d:
+                sensor_hours_7d[sensor] = []
+            sensor_hours_7d[sensor].append(value)
+
+    # Pro Sensor Prognose berechnen
+    prognosis_rows = []
+    run_ts = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    for sensor_id, entries in sensor_hours_30d.items():
+        if not entries:
+            continue
+
+        values_30d = [v for _, v in entries]
+        total_30d = sum(values_30d)
+        hours_count = len(values_30d)
+
+        if hours_count < 24:
+            continue  # Mindestens 1 Tag Daten nötig
+
+        # Durchschnitt pro Stunde (letzte 30 Tage)
+        avg_kwh_per_hour = total_30d / hours_count
+        avg_kwh_per_day = avg_kwh_per_hour * 24
+
+        # Prognosen
+        prognose_jahr_kwh = avg_kwh_per_hour * 8760
+        prognose_jahr_eur = round(prognose_jahr_kwh * strompreis, 2)
+        prognose_monat_eur = round(prognose_jahr_eur / 12, 2)
+
+        # CO₂
+        co2_jahr_kg = round(prognose_jahr_kwh * co2_wert / 1000, 2)
+
+        # Energieklasse
+        if prognose_jahr_kwh < limit_a:
+            klasse = "A"
+        elif prognose_jahr_kwh < limit_b:
+            klasse = "B"
+        elif prognose_jahr_kwh < limit_c:
+            klasse = "C"
+        elif prognose_jahr_kwh < limit_d:
+            klasse = "D"
+        elif prognose_jahr_kwh < limit_e:
+            klasse = "E"
+        elif prognose_jahr_kwh < limit_f:
+            klasse = "F"
+        else:
+            klasse = "G"
+
+        # Trend: 7 Tage vs. 30 Tage
+        values_7d = sensor_hours_7d.get(sensor_id, [])
+        if values_7d and hours_count > len(values_7d):
+            avg_7d = sum(values_7d) / len(values_7d)
+            avg_30d_only = avg_kwh_per_hour
+            trend_7d = round(((avg_7d - avg_30d_only) / avg_30d_only) * 100, 1) if avg_30d_only > 0 else 0.0
+        else:
+            trend_7d = 0.0
+
+        # Peak-Hour: Stunde mit höchstem Durchschnitt
+        hour_buckets: dict[int, list[float]] = {}
+        for ts_int, value in entries:
+            dt = datetime.fromtimestamp(ts_int, tz=timezone.utc)
+            h = dt.hour
+            if h not in hour_buckets:
+                hour_buckets[h] = []
+            hour_buckets[h].append(value)
+
+        peak_hour = 0
+        peak_avg = 0.0
+        for h, vals in hour_buckets.items():
+            h_avg = sum(vals) / len(vals)
+            if h_avg > peak_avg:
+                peak_avg = h_avg
+                peak_hour = h
+
+        # Base-Load: Durchschnitt der niedrigsten 20% Stundenwerte → Watt
+        sorted_vals = sorted(values_30d)
+        base_count = max(1, int(len(sorted_vals) * 0.2))
+        base_kwh = sum(sorted_vals[:base_count]) / base_count
+        base_load_w = round(base_kwh * 1000, 1)  # kWh/h → W
+
+        prognosis_rows.append((
+            sensor_id,
+            round(avg_kwh_per_hour, 6),
+            round(avg_kwh_per_day, 4),
+            prognose_monat_eur,
+            prognose_jahr_eur,
+            round(prognose_jahr_kwh, 2),
+            klasse,
+            co2_jahr_kg,
+            trend_7d,
+            peak_hour,
+            base_load_w,
+            run_ts,
+        ))
+
+    # In DB schreiben
+    if prognosis_rows:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute("DELETE FROM sensor_prognosis;")
+        cur.executemany("""
+            INSERT INTO sensor_prognosis (
+                sensor_id, avg_kwh_per_hour, avg_kwh_per_day,
+                prognose_monat_eur, prognose_jahr_eur, prognose_jahr_kwh,
+                energieklasse, co2_jahr_kg, trend_7d, peak_hour, base_load_w, last_update
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, prognosis_rows)
+        conn.commit()
+        conn.close()
+        logger.info(f"✅ Prognosen für {len(prognosis_rows)} Sensoren berechnet und gespeichert.")
+    else:
+        logger.warning("⚠️ Keine Prognosen berechnet (zu wenig Daten).")
+
+
 def run_pipeline():
     logger.info("Status: Processing Pipeline gestartet.")
     start_time = time.time()
@@ -436,6 +613,9 @@ def run_pipeline():
 
         duration = time.time() - start_time
         logger.info(f"🏁 Lauf erfolgreich beendet. Dauer: {duration:.2f} Sekunden.")
+
+        # Prognosen berechnen (immer, unabhängig vom Modus)
+        calculate_prognosis()
 
         notify_ha(
             event="pipeline_success",

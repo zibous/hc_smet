@@ -224,6 +224,82 @@
     flex-wrap: wrap;
   }
 }
+
+/* -----------------------------------------------
+   ERWEITERTE SENSOR-KARTEN (GET-Modus)
+----------------------------------------------- */
+
+/* Watt-Anzeige oben rechts */
+.sensor-watt {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+.watt-active {
+  color: #ef4444;
+}
+.watt-idle {
+  color: var(--text-muted);
+}
+
+/* Detail-Rows */
+.sensor-card-details {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+.detail-label {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+.detail-value {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+/* Energieklasse Badge */
+.energieklasse-badge {
+  display: inline-block;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 4px;
+}
+
+/* Online/Offline Badges */
+.badge-online {
+  display: inline-block;
+  background: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+.badge-off {
+  display: inline-block;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
 /* Area Grouping */
 .area-group {
   margin-bottom: 2.5rem;

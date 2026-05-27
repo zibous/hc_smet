@@ -105,17 +105,17 @@ der mathematisch nur positive Änderungen aufaddiert.
       └──────────────────────┘
                 │
                 ▼
-      ┌──────────────────────┐
-      │ Sensor-Objekte bauen │
-      │ (S01–S50)            │
-      └──────────────────────┘
+      ┌──────────────────────────────────────────────┐
+      │ Sensor-Objekte bauen (S01–S50)               │
+      │ → sensor.has_ever_pulsed = False (initial)   │
+      └──────────────────────────────────────────────┘
                 │
                 ▼
-┌─────────────────────────────────┐
-│   AUTOMATISCHE ZUORDNUNG        │
-│   S01–S25 → Z1 (10.1.1.64)      │
-│   S26–S50 → Z2 (10.1.1.65)      │
-└─────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│   AUTOMATISCHE ZUORDNUNG                     │
+│   S01–S25 → Z1 (10.1.1.64)                   │
+│   S26–S50 → Z2 (10.1.1.65)                   │
+└──────────────────────────────────────────────┘
                 │
                 ▼
       ┌──────────────────────┐
@@ -124,17 +124,38 @@ der mathematisch nur positive Änderungen aufaddiert.
       └──────────────────────┘
                 │
                 ▼
-┌────────────────────────────────────────────┐
-│   PIN-ZUORDNUNG                            │
-│   Z1: S01→Pin0, S02→Pin1, ... S25→Pin48    │
-│   Z2: S26→Pin0, S27→Pin1, ... S50→Pin48    │
-└────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│   PIN-ZUORDNUNG                              │
+│   Z1: S01→Pin0 ... S25→Pin48                 │
+│   Z2: S26→Pin0 ... S50→Pin48                 │
+└──────────────────────────────────────────────┘
                 │
                 ▼
-      ┌──────────────────────┐
-      │ JSON laden (Storage) │
-      │ alte Werte, kWh, ts  │
-      └──────────────────────┘
+      ┌──────────────────────────────────────────┐
+      │ JSON laden (StorageHandler)              │
+      │ → total_kwh, prev_kwh, historische Werte │
+      │ → has_ever_pulsed wird geladen           │
+      └──────────────────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      REVOLVIERENDER CROSS-CHECK                             │
+│                                                                             │
+│   ┌───────────────────────────────────┬───────────────────────────────────┐ │
+│   │ JSON gültig                       │ JSON fehlt / korrupt              │ │
+│   ├───────────────────────────────────┼───────────────────────────────────┤ │
+│   │ → SQLite-Stundenwert prüfen       │ → Letzten total_kwh aus SQLite    │ │
+│   │ → Stundenbasis rekonstruieren     │ → Sensor.initialized = True       │ │
+│   │ → has_ever_pulsed bleibt erhalten │ → has_ever_pulsed = True, wenn    │ │
+│   │                                   │   total > 0                       │ │
+│   └───────────────────────────────────┴───────────────────────────────────┘ │
+│                                                                             │
+│   NEUE LOGIK:                                                               │
+│   - Wenn total_kwh == 0.0 UND SQLite leer UND has_ever_pulsed == False:     │
+│         → echter Kaltstart                                                  │
+│   - Wenn total_kwh == 0.0 UND has_ever_pulsed == False:                     │
+│         → Sensor ohne Last (kein Fehler)                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
                 │
                 ▼
       ┌──────────────────────┐
@@ -156,21 +177,47 @@ der mathematisch nur positive Änderungen aufaddiert.
 │   │ Werte lesen   │ Sensoren dieses Geräts offline setzen  │ │
 │   │ JSON parsen   │ dev.online = False                     │ │
 │   │ Sensor.update │                                        │ │
+│   │ → setzt has_ever_pulsed=True, sobald total_kwh > 0     │ │
 │   └───────────────┴────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
+                │
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│                  STÜNDLICHE VERBRAUCHSERFASSUNG              │
+│   consumption = total_kwh - db_hour_start_cache              │
+│   Schutz: Wenn consumption < 0 → auf 0.0 setzen              │
+└──────────────────────────────────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                     SQLITE INSERT / UPDATE                                 │
+│                                                                            │
+│   NEUE LOGIK:                                                              │
+│   Nur speichern, wenn:                                                     │
+│       consumption > 0.0  ODER  total_kwh > 0.0                             │
+│                                                                            │
+│   → Sensoren ohne Last (immer 0.0) werden NICHT gespeichert                │
+│   → DB bleibt sauber                                                       │
+│                                                                            │
+│   ON CONFLICT(sensor_id, hour) DO UPDATE                                   │
+│   → schützt vor Datenverlust                                               │
+└────────────────────────────────────────────────────────────────────────────┘
                 │
                 ▼
       ┌──────────────────────┐
       │ Werte speichern      │
       │ (StorageHandler)     │
+      │ → speichert auch     │
+      │   has_ever_pulsed    │
       └──────────────────────┘
                 │
                 ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                     DATEN FÜR UI / API                       │
 │   get_all_data() → {                                         │
-│       "S01": { name, watt, kwh, total_kwh,                   │
-│                pin, device_id, online, status }              │
+│       "S01": { watt, kwh, total_kwh,                         │
+│                pin, device_id, online, status,               │
+│                has_ever_pulsed }                             │
 │       ...                                                    │
 │   }                                                          │
 └──────────────────────────────────────────────────────────────┘
@@ -180,6 +227,7 @@ der mathematisch nur positive Änderungen aufaddiert.
       │ Anzeige / Konsole    │
       │ Web-UI / Logging     │
       └──────────────────────┘
+
 ```
 
 ## 🗂️ Modulübersicht
@@ -292,6 +340,20 @@ erkennt die Software den Geräteneustart.
 - verhindert Datenverlust bei Neustarts
 - WICHTIG bei Device Neustart: Neuen Wert einfach auf den alten,
   im der json (peristant storage) gesicherten Stand oben drauf.
+
+## sqlite database
+
+Database sensordata.db
+
+````
+CREATE TABLE hourly_values (
+                sensor_id TEXT NOT NULL,
+                hour INTEGER NOT NULL,
+                consumption REAL NOT NULL,
+                total REAL,
+                PRIMARY KEY (sensor_id, hour)
+            )
+```
 
 ### house.yaml - sensors
 

@@ -1,0 +1,710 @@
+<!doctype html>
+<html>
+<head>
+<title>PoKeys device Dashboard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<style>
+body {
+  margin: 0px;
+  background-color: rgb(200,200,200);
+  font: 13px/20px Arial,sans-serif;
+}
+
+div.header {
+  background-color: rgb(40,40,40);
+  height: 30px;
+  width: 100%;
+  display: block;
+  position: absolute;
+  top: 0;
+  padding-top: 0px;
+  color: white;
+}
+
+#menu
+{
+  padding-left: 0px;
+}
+
+li, #menu  {
+  display: inline;
+  list-style-type: none;
+  line-height: 30px;
+  border: none;
+}
+
+li.user {
+  position: absolute;
+  right: 10px;
+  font-weight: bold;
+}
+
+li.refresh {
+  position: absolute;
+  right: 200px;
+  font-weight: bold;
+}
+
+li.device {
+  font: 16px/30px Arial,sans-serif;
+  font-weight: bold;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+a.ns {
+  color: rgb(180,180,180);
+  text-decoration: none;
+  padding-top: 7px;
+  padding-bottom: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+a.ns:hover {
+  background-color: rgb(80,80,80);
+}
+
+a.selected {
+  color: white;
+  font-weight: bold;
+}
+
+a.aIO {
+  text-decoration: none;
+  color: rgb(0,0,0);
+}
+a.aIO:hover {
+  background-color: rgb(80,80,80);
+}
+
+.linkbg {
+  padding: 0 0px;
+  position: relative;
+  line-height: 30px;
+}
+
+.background {
+  opacity:0.75;
+  background-color: rgb(80,80,80);
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  visibility: hidden;
+  z-index: 1;
+}
+
+div.loginform {
+  position: absolute;
+  width: 200px;
+  height: 130px;
+  background: white;
+  text-align: center;
+  visibility: hidden;
+  z-index: 5;
+  top: 50px;
+  left: 50%;
+  margin-left: -100px;
+  border-style:solid;
+  border-width:1px;
+}
+
+div.iDashboard {
+  position: absolute;
+  width: 80%;
+  left: 10%;
+}
+
+div.iBox, div.iBoxIO, div.iBoxAnalog, div.iBoxEncoders, div.iBoxInfo, div.iBoxSet {
+  width: 300px;
+  height: 140px;
+  background-color: white;
+  border-radius:8px 8px;
+  border-style:solid;
+  border-width:2px;
+  float: left;
+  margin: 15px 0 0 35px;
+  -moz-box-shadow: 3px 3px 4px #000;
+  -webkit-box-shadow: 3px 3px 4px #000;
+  box-shadow: 3px 3px 4px #000;
+}
+
+div.iEmptyBox {
+  width: 600px;
+  height: 50px;
+  float: left;
+  margin: 15px 0 0 35px;
+  text-align: center;
+}
+
+div.iBoxIO {
+  height: 230px;
+  width: 600px;
+}
+
+div.iBoxAnalog {
+  height: 170px;
+  width: 600px;
+}
+
+div.iBoxEncoders {
+  height: 230px;
+  width: 600px;
+}
+
+div.iBoxInfo {
+  height: 140px;
+  width: 600px;
+}
+
+div.iBoxSet {
+  height: 200px;
+  width: 600px;
+}
+
+div.iTitle, div.iTitleIO {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  color: white;
+  font-weight: bold;
+  width: 300px;
+  height: 22px;
+  background-color: rgb(50, 50, 50);
+  text-align: center;
+}
+
+div.iTitleIO {
+  width: 600px;
+}
+
+div.iSpacer {
+  height: 25px;
+}
+
+div.buttom {
+  width: 100%;
+  font: 14px/18px Arial,sans-serif;
+  text-align: center;
+  float: left;
+  margin-top: 20px;
+  color: rgb(100,100,100);
+}
+
+div.iValue, div.iValueOn, div.iValueOff, div.iValueEnter {
+  width: 300px;
+  height: 70px;
+  font: 4em Helvetica,Arial,sans-serif;
+  font-weight: bold;
+  color: rgb(66, 124, 192);
+  text-align: center;
+  text-shadow: rgb(150,150,150) 2px 2px 2px;
+}
+
+div.iPin, div.iPinOut, div.iPinValueOff, div.iPinValueOn, div.iAnalogProgressBar, div.iAnalogValue, div.iPinValueSet, div.iEncoder, div.iEncoderValue, div.iSetting, div.iSettingVal {
+  width: 47px;
+  height: 18px;
+  font: 14px/18px Arial,sans-serif;
+  text-align: center;
+  float: left;
+  margin-top: 2px;
+  margin-left: 2px;
+}
+
+
+
+div.iPinOut {
+  font-weight: bold;
+  cursor:pointer;
+  cursor:hand;
+  border-radius:10px 10px;
+  border-style:solid;
+  border-width:1px;
+  height: 16px;
+  width: 45px;
+}
+
+div.iPinValueOff {
+  background: rgb(250,50,50);
+}
+div.iPinValueOn {
+  background: rgb(50,250,50);
+}
+
+div.iPinValueSet {
+  background: rgb(200,200,200);
+}
+
+div.iAnalogValue {
+  width: 80px;
+}
+
+
+div.iValueOn {
+  color: rgb(66, 200, 20);
+}
+
+div.iValueOff {
+  color: rgb(235, 82, 0);
+}
+
+
+div.iUnit {
+  width: 50px;
+  display: inline;
+  height: 50px;
+  font: 0.65em Helvetica,Arial,sans-serif;
+  vertical-align: text-middle;
+}
+
+div.iProgressBar, div.iButtons {
+  width: 250px;
+  height: 15px;
+  margin-left: 20px;
+  background-color: white;
+  border: 2px ridge rgb(0, 0, 0);
+}
+
+input[type="text"] {
+  width: 250px;
+  height: 70px;
+  font: 1em Helvetica,Arial,sans-serif;
+  font-weight: bold;
+  color: rgb(66, 124, 192);
+  text-align: center;
+  text-shadow: rgb(150,150,150) 2px 2px 2px;
+  background-color: lightgray;
+}
+
+div.iValueEnter {
+	width: 250px;
+	height: 50px;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+div.iAnalogProgressBar {
+  width: 450px;
+  height: 14px;
+  background-color: white;
+  border: 2px ridge rgb(0, 0, 0);
+}
+
+div.iButtons {
+  border: none;
+  text-align: center;
+}
+
+div.iProgressBarValue {
+  background-color: rgb(66, 124, 192);
+  width: 0%;
+  height: 100%;
+}
+
+div.iMin, div.iMax {
+  height: 20px;
+  width: 100px;
+  font: 1.2em Helvetica,Arial,sans-serif;
+  font-weight: bold;
+  text-shadow: #6374AB 1px 1px 1px;
+}
+
+div.iMin {
+  margin-left: 20px;
+  float:left;
+}
+
+div.iMax {
+  margin-right: 25px;
+  text-align: right;
+  float:right;
+}
+
+div.iSetting {
+  width: 300px;
+  height: 25px;
+  text-align: right;
+}
+
+div.iSettingVal {
+  width: 250px;
+  height: 25px;
+  text-align: left;
+  margin-left: 20px;
+  font-weight: bold;
+  color: rgb(66, 124, 192);
+}
+</style>
+
+<script>
+var stopRefreshing = 0;
+var numEl = 0;
+var retry = 0;
+var svalues = [];
+var numPat = /^[+-]?\d+(\.\d{1,2})?$/;
+
+function login()
+{
+  document.getElementById('back').style.visibility = 'visible';
+  document.getElementById('formframe').style.visibility = 'visible';
+  document.getElementById('uin').focus();
+}
+
+function cancelLogin()
+{
+  document.getElementById('back').style.visibility = 'hidden';
+  document.getElementById('formframe').style.visibility = 'hidden';
+}
+
+function toggleDO(index, state)
+{
+  el = document.getElementById('val' + index);
+  el.innerHTML = "--";
+  el.className = "iValue";
+
+  // Send value here and refresh the display
+  if (window.XMLHttpRequest) xmlSO=new XMLHttpRequest(); else xmlSO=new ActiveXObject("Microsoft.XMLHTTP");
+
+  xmlSO.open("GET", "setS.html?Sensor=" + index + "&State=" + state,  true);
+  xmlSO.send(null);
+}
+function sendTextValue(e, obj, P1, P2, index)
+{
+	var charCode = (typeof e.which === "number") ? e.which : e.keyCode;
+	if (charCode == 13)
+	{
+		if (numPat.test(obj.value))
+		{
+			showEntryField(P1,P2,index,false);
+
+			// Send value here and refresh the display
+			if (window.XMLHttpRequest) xmlSO=new XMLHttpRequest(); else xmlSO=new ActiveXObject("Microsoft.XMLHTTP");
+
+			state = (obj.value * 100) | 0;
+			xmlSO.open("GET", "setS.html?Sensor=" + index + "&State=" + state,  true);
+			xmlSO.send(null);
+		} else
+		{
+			alert('Please check the value.');
+		}
+	} else if (charCode == 27)
+	{
+		showEntryField(P1,P2,index,false);
+	}
+}
+
+function showEntryField(P1, P2, index, state)
+{
+  el = document.getElementById('valC' + index);
+  if (state)
+  {
+		tmp = 0;
+
+		if (index < svalues.length)
+		{
+			tmp = svalues[index];
+		}
+		defocus = " onBlur=\"showEntryField(" + P1 + "," + P2 + "," + index + ",false);\"";
+		enterKey = " onkeyup=\"sendTextValue(event, this, " + P1 + "," + P2 + "," + index + ");\"";
+		el.innerHTML = "<input type=text" + defocus + enterKey + " id=textV" + index + " pattern=\"" + numPat + "\" name=changeVal" + index + " value=\"" + tmp + "\" />";
+		el.className = "iValueEnter";
+
+		document.getElementById('textV' + index).focus();
+  } else
+  {
+		el.innerHTML = getDispInternal(P1, P2, index);
+		el.className = "";
+	}
+}
+
+function addCommon() { return "<div class=iBox><div class=iTitle id=title"+numEl+">__</div>"; }
+
+function addDisplay(sensor)
+{
+	switch (sensor.Disp)
+	{
+		case 0: return addNumValDisplay(sensor.P1, sensor.P2);
+		case 10: return addOnOffDisplay(sensor.P1, sensor.P2);
+	}
+	return "";
+}
+
+function getDispInternal(P1, P2, index)
+{
+	tCont = "";
+	clickCode = "";
+	if ((P1 & 4) > 0)
+	{
+		clickCode = " onClick=\"showEntryField(" + P1 + "," + P2 + "," + index + ",true);\"";
+	}
+  switch (P1)
+  {
+		case 0:
+		case 4:
+			tCont += "<div class=iSpacer></div><div class=iValue" + clickCode + " id=val" + index + "></div>";
+			break;
+
+		case 1:
+		case 5:
+			tCont += "<div class=iValue" + clickCode + " id=val" + index + "></div>";
+			tCont += "<div class=iProgressBar><div class=iProgressBarValue id=progress" + index + "></div></div>";
+			tCont += "<div class=iMin id=min" + index + ">__</div><div class=iMax id=max" + index + ">__</div>";
+			break;
+  }
+  return tCont;
+}
+
+function addNumValDisplay(P1, P2)
+{
+	showProgress = (P1 & 1) > 0;
+	showChange = (P1 & 4) > 0;
+  tCont = addCommon();
+
+  switch (P1)
+  {
+		case 0:
+			tCont += getDispInternal(P1,P2,numEl);
+			break;
+		case 1:
+			tCont += getDispInternal(P1,P2,numEl);
+			break;
+		case 4:
+			tCont+="<div id=valC" + numEl + "></div>";
+			break;
+		case 5:
+			tCont+="<div id=valC" + numEl + "></div>";
+			break;
+  }
+  tCont+="</div>"; numEl++;
+
+  return tCont;
+}
+
+function addOnOffDisplay(P1, P2)
+{
+	showOnOff = (P1 & 1) > 0;
+	showToggle = (P1 & 2) > 0;
+  tCont=addCommon() + "<div class=iSpacer></div>";
+
+  tCont+="<div class=iValueOff id=val" + numEl + ">__</div>";
+
+  if (showOnOff || showToggle)
+  {
+		tCont+="<div class=iButtons>";
+		if (showOnOff)
+			tCont += "<INPUT TYPE=BUTTON OnClick=\"toggleDO(" + numEl + ", 0);\" VALUE=\"Turn OFF\"> <INPUT TYPE=BUTTON OnClick=\"toggleDO(" + numEl + ", 1);\" VALUE=\"Turn ON\">";
+		if (showToggle)
+			tCont += " <INPUT TYPE=BUTTON OnClick=\"toggleDO(" + numEl + ", 'T');\" VALUE=\"Toggle\">";
+		tCont += "</div>";
+  }
+  tCont+="</div>"; numEl++; return tCont;
+}
+
+
+
+function setOnOff(index,sensor)
+{
+  document.getElementById("title" + index).innerHTML = sensor.ID;
+  document.getElementById("val" + index).innerHTML = (sensor.Val>0)?"ON":"OFF";
+  document.getElementById("val" + index).className = (sensor.Val>0)?"iValueOn":"iValueOff";
+}
+function setValue(index,sensor)
+{
+	showProgress = (sensor.P1 & 1) > 0;
+	showChange = (sensor.P1 & 4) > 0;
+
+	svalues[index] = sensor.Val;
+
+	if (showChange)
+	{
+		disp = document.getElementById('valC' + index);
+		if (disp != null && disp.className == "iValueEnter")
+		{
+			return;
+		} else
+			showEntryField(sensor.P1, sensor.P2, index, false);
+	}
+  document.getElementById("title" + index).innerHTML = sensor.ID;
+  document.getElementById("val" + index).innerHTML = sensor.Val + "<div class=iUnit>" + sensor.U + "</div>";
+
+  if (showProgress)
+  {
+		v = sensor.Val;
+    if (v > sensor.Max) v = sensor.Max;
+    if (v < sensor.Min) v = sensor.Min;
+    document.getElementById("min" + index).innerHTML = sensor.Min + " " + sensor.U;
+    document.getElementById("max" + index).innerHTML = sensor.Max + " " + sensor.U;
+    document.getElementById("progress" + index).style.width = 100 * (v - sensor.Min) / (sensor.Max - sensor.Min) + "%";
+  }
+}
+
+function init() {
+  var copyright = "<div class=\"iSpacer\">&nbsp;</div><div class=\"buttom\">All rights reserved. © 2017 PoLabs</div>";
+  var dashboardEl = document.getElementById("dashboard");
+
+  // 1. Sensordaten als rohen TEXT laden
+  fetch("http://10.1.1.64/sensorList.json")
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error("Netzwerkfehler");
+      }
+      return response.text(); // WICHTIG: Als Text laden, nicht als JSON!
+    })
+    .then(function(rawText) {
+      // Hier entfernen wir das kaputte "[]" am Ende des Strings
+      var fixedText = rawText.replace(/\[\]\s*\}$/, "]}");
+
+      // Jetzt erst parsen wir den reparierten Text manuell
+      var data = JSON.parse(fixedText);
+      var temp = "";
+
+      if (data.sensors && data.sensors.length > 0) {
+        for (var s = 0; s < data.sensors.length; s++) {
+          temp += addDisplay(data.sensors[s]);
+        }
+      } else {
+        temp = "<div class=\"iTitleIO\">Please use PoKeys software to set up the dashboard.</div>";
+      }
+
+      temp += copyright;
+      dashboardEl.innerHTML = temp;
+
+      // Wenn Sensoren vorhanden sind, Anzeige aktualisieren
+      if (data.sensors && data.sensors.length > 0) {
+        refreshDisplay(data);
+      }
+
+      // 2. Gerätedaten asynchron laden
+      loadDeviceData();
+    })
+    .catch(function(error) {
+      dashboardEl.innerHTML = "<div class=\"iTitleIO\">Error while reading the configuration</div>" + copyright;
+      console.error("Fehler beim Initialisieren:", error);
+    });
+}
+
+
+// Hilfsfunktion für das Laden der XML-Gerätedaten
+function loadDeviceData() {
+  var xmldev = new XMLHttpRequest();
+  xmldev.onreadystatechange = function() {
+    // deviceData muss als globale Funktion existieren
+    if (typeof deviceData === "function") {
+      deviceData.call(xmldev);
+    }
+  };
+  xmldev.open("GET", "devData.xml", true);
+  xmldev.send(null);
+}
+
+
+function deviceData()
+{
+  if(xmldev.readyState == 4 )
+  {
+    if (xmldev.status != 200)
+    {
+      if (retry++ < 10)
+      {
+        xmldev.open("GET", "devData.xml",  true);
+        xmldev.send(null);
+      }
+      return;
+    }
+
+    retry = 0;
+    state = 0;
+
+    xmlDocd = xmldev.responseXML;
+
+    userID = xmlDocd.getElementsByTagName("uID")[0].childNodes[0].nodeValue;
+    devName = xmlDocd.getElementsByTagName("dev")[0].childNodes[0].nodeValue;
+    user = xmlDocd.getElementsByTagName("User")[0].childNodes[0].nodeValue;
+    security = xmlDocd.getElementsByTagName("Security")[0].childNodes[0].nodeValue;
+
+    if (user != "none")
+    {
+      document.getElementById("usermenu").innerHTML = "User: " + user + " <a class=ns href=\"logout.html\">Log out</a>";
+    } else
+    {
+      document.getElementById("usermenu").innerHTML = "Not logged in <a class=ns href=\"\" OnClick=\"login();return false;\">Log in</a>";
+    }
+
+    xmld.onreadystatechange = ref;
+    setTimeout("updateList()", 2000);
+  }
+}
+
+function refreshDisplay(data)
+{
+  for (i = 0; i < data.sensors.length; i++)
+  {
+    sensor = data.sensors[i];
+
+    switch (sensor.Disp)
+    {
+			case 0: setValue(i,sensor); break;
+			case 10: setOnOff(i,sensor); break;
+    }
+  }
+}
+
+function updateList()
+{
+  xmld.open("GET", "sensorList.json", true);
+  xmld.send(null);
+
+  document.getElementById("refresh").innerHTML = "Refreshing data...";
+}
+
+function clearRefresh()
+{
+    document.getElementById("refresh").innerHTML = "";
+}
+
+function ref()
+{
+  if(xmld.readyState == 4)
+  {
+    if (xmldev.status != 200)
+    {
+      setTimeout("updateList()", 2000);
+      return;
+    }
+
+		refreshDisplay(JSON.parse(xmld.responseText));
+
+    setTimeout("clearRefresh()", 100);
+    setTimeout("updateList()", 2000);
+  }
+}
+</script>
+</head>
+<body onLoad="init();">
+<div class="header">
+  <ul id="menu">
+    <li class=device>PoLabs - PoKeys</li>
+    <li><a class="ns selected" href="indexDash.html"><span class=linkbg>Dashboard</span></a></li>
+    <li><a class=ns href="indexIO.html"><span class=linkbg>Input/Output status</span></a></li>
+    <li><a class=ns href="indexSet.html"><span class=linkbg>Settings</span></a></li>
+    <li><a class=ns href="http://www.poscope.com/index.php"><span class=linkbg>Homepage</span></a></li>
+    <li class=refresh id=refresh></li>
+    <li class=user id=usermenu>Reading user data...</li>
+  </ul>
+</div>
+<br /><br />
+
+<div class=background id=back onClick="cancelLogin();"></div>
+
+<div class=loginform id=formframe>
+  <form method=POST action=login.html>
+  Username: <input type="text" name="u" id=uin>
+  Password: <input type="password" name="p">
+  <p><input type="submit" name="login" value="Login"></p>
+  </form>
+</div>
+
+<div class=iDashboard id=dashboard>Dashboard requires Javascript</div>
+</body>
+</html>

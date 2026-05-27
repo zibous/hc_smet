@@ -3,7 +3,7 @@
  * Zeigt Cluster-Profile und Lastanalyse der Sensoren
  */
 
-const API_URL = '../api/dashboard2/analytics';
+const API_URL = 'api/dashboard2/analytics';
 const grid = document.getElementById('analytics-grid');
 const refreshInfo = document.getElementById('analytics-refresh');
 

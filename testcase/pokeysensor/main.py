@@ -116,8 +116,10 @@ def dashboard():
     # KPIs
     total_watt = sum(s.watt for s in active)
     total_kwh = sum(safe_float(s.verbrauch_kwh) for s in active)
+
     total_cost = sum(safe_float(s.kosten) for s in active)
     total_co2 = sum(safe_float(s.co2) for s in active)
+
     online_count = sum(1 for s in active if s.online)
     offline_count = len(active) - online_count
 
@@ -138,10 +140,7 @@ def dashboard():
     <head>
         <meta charset="utf-8" />
         <title>Live Energie-Dashboard</title>
-
-        <!-- FIXED: Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
         <style>
             body {{ background:#111;color:#eee;font-family:sans-serif;margin:20px; }}
             .chart-container {{ background:#1b1b1b;padding:16px;border-radius:16px;margin-bottom:20px; }}
@@ -154,22 +153,23 @@ def dashboard():
             .kpi {{background: #222;padding: 12px;border-radius: 12px;text-align: center;}}
             .kpi-value {{font-size: 18px;font-weight: bold;}}
         </style>
+         <script>
+            // Auto-Refresh jede Minute
+            setInterval(() => {{
+                window.location.reload();
+            }}, 60000);
+        </script>
     </head>
     <body>
-
         <h1>⚡ Energie Dashboard</h1>
-
         <div class="chart-container">
             <canvas id="chart"></canvas>
         </div>
-
         <div class="chart-container">
             <canvas id="topChart"></canvas>
         </div>
-
         <div class="chart-container">
             <h2>📊 Gesamtübersicht</h2>
-
             <div class="kpi-grid">
                 <div class="kpi">⚡ Verbrauch<div class="kpi-value">{total_watt:.0f} W</div></div>
                 <div class="kpi">🔋 Energie<div class="kpi-value">{total_kwh:.2f} kWh</div></div>
@@ -179,15 +179,10 @@ def dashboard():
                 <div class="kpi">🔴 Offline<div class="kpi-value">{offline_count}</div></div>
             </div>
         </div>
-
-
         <div class="grid">{cards_html}</div>
-
         <script>
-
             const mainData = {json.dumps(chart_data, ensure_ascii=False)};
             const topData = {json.dumps(top_data, ensure_ascii=False)};
-
             new Chart(document.getElementById('chart'), {{
                 type: 'bar',
                 data: {{
@@ -199,7 +194,6 @@ def dashboard():
                     }}]
                 }}
             }});
-
             new Chart(document.getElementById('topChart'), {{
                 type: 'bar',
                 data: {{
@@ -211,11 +205,7 @@ def dashboard():
                     }}]
                 }}
             }});
-
-</script>
-
-
-
+        </script>
     </body>
     </html>
     """

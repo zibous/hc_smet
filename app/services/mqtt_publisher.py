@@ -34,6 +34,7 @@ class MQTTPublisher:
 
     def __init__(self, sensor_store):
         self.store = sensor_store
+        self._is_pokeys_manager = hasattr(sensor_store, "get_all_data")
         self.client: mqtt.Client | None = None
         self.connected = False
         self._timer: threading.Timer | None = None
@@ -159,49 +160,89 @@ class MQTTPublisher:
     # =========================================================
     def _publish_sensors(self):
         """Publiziert alle aktiven Sensoren."""
-        store_data = self.store.get_all()
         sensors_info = STRUCTURE.get("sensors", {})
         rooms_info = STRUCTURE.get("rooms", {})
 
-        for sensor_id, entry in store_data.items():
-            if entry.current == 0:
-                continue
+        if self._is_pokeys_manager:
+            # GET-Modus: Daten vom PoKeysManager
+            all_data = self.store.get_all_data()
+            for sensor_id, info in all_data.items():
+                if info.get("total_kwh", 0) == 0:
+                    continue
 
-            meta = sensors_info.get(sensor_id, {})
-            room_id = meta.get("room", "")
-            room_name = rooms_info.get(room_id, {}).get("name", "-")
+                meta = sensors_info.get(sensor_id, {})
+                room_id = meta.get("room", "")
+                room_name = rooms_info.get(room_id, {}).get("name", "-")
 
-            # Tagesverbrauch aus DB
-            day_consumption = self._get_day_consumption(sensor_id)
+                # Tagesverbrauch aus DB
+                day_consumption = self._get_day_consumption(sensor_id)
 
-            payload = {
-                "id": sensor_id,
-                "name": meta.get("name", sensor_id),
-                "room": room_name,
-                "total": round(entry.current * settings.SENSOR_SCALE_FACTOR, 2),
-                "current": round(entry.delta * settings.SENSOR_SCALE_FACTOR, 4),
-                "day": round(day_consumption, 3),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "attribution": settings.APP_ATTRIBUTION,
-                "source": settings.APP_NAME,
-            }
+                payload = {
+                    "id": sensor_id,
+                    "name": info.get("name", sensor_id),
+                    "room": room_name,
+                    "total": round(info.get("total_kwh", 0), 2),
+                    "current": round(info.get("verbrauch_kwh", 0), 4),
+                    "watt": info.get("watt", 0),
+                    "day": round(day_consumption, 3),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "attribution": settings.APP_ATTRIBUTION,
+                    "source": settings.APP_NAME,
+                }
 
-            topic = f"{self._base_topic}/sensors/{sensor_id}"
-            self.client.publish(topic, json.dumps(payload), qos=0, retain=True)
+                topic = f"{self._base_topic}/sensors/{sensor_id}"
+                self.client.publish(topic, json.dumps(payload), qos=0, retain=True)
+        else:
+            # POST-Modus: Legacy SensorStore
+            store_data = self.store.get_all()
+            for sensor_id, entry in store_data.items():
+                if entry.current == 0:
+                    continue
+
+                meta = sensors_info.get(sensor_id, {})
+                room_id = meta.get("room", "")
+                room_name = rooms_info.get(room_id, {}).get("name", "-")
+
+                # Tagesverbrauch aus DB
+                day_consumption = self._get_day_consumption(sensor_id)
+
+                payload = {
+                    "id": sensor_id,
+                    "name": meta.get("name", sensor_id),
+                    "room": room_name,
+                    "total": round(entry.current * settings.SENSOR_SCALE_FACTOR, 2),
+                    "current": round(entry.delta * settings.SENSOR_SCALE_FACTOR, 4),
+                    "day": round(day_consumption, 3),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "attribution": settings.APP_ATTRIBUTION,
+                    "source": settings.APP_NAME,
+                }
+
+                topic = f"{self._base_topic}/sensors/{sensor_id}"
+                self.client.publish(topic, json.dumps(payload), qos=0, retain=True)
 
     def _publish_rooms(self):
         """Publiziert Raum-Aggregationen."""
         rooms_info = STRUCTURE.get("rooms", {})
         sensors_info = STRUCTURE.get("sensors", {})
-        store_data = self.store.get_all()
 
         for room_id, room in rooms_info.items():
             sensor_ids = [sid for sid, s in sensors_info.items() if s.get("room") == room_id]
             day_total = sum(self._get_day_consumption(sid) for sid in sensor_ids)
-            current_total = sum(
-                store_data[sid].delta * settings.SENSOR_SCALE_FACTOR
-                for sid in sensor_ids if sid in store_data
-            )
+
+            current_total = 0.0
+            if self._is_pokeys_manager:
+                all_data = self.store.get_all_data()
+                current_total = sum(
+                    all_data[sid].get("verbrauch_kwh", 0)
+                    for sid in sensor_ids if sid in all_data
+                )
+            else:
+                store_data = self.store.get_all()
+                current_total = sum(
+                    store_data[sid].delta * settings.SENSOR_SCALE_FACTOR
+                    for sid in sensor_ids if sid in store_data
+                )
 
             if day_total == 0 and current_total == 0:
                 continue

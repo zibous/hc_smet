@@ -73,15 +73,14 @@ sensors:
 
   S12: { name: "Küchenmöbel", room: WG_R03, devices: [kuechenmoebel], model: eacWSZ-50A, impulse: 1000 }
   S13: { name: "Kühlschrank", room: WG_R03, devices: [kuehlschrank], model: eacWSZ-50A, impulse: 1000 }
+  S14: { name: "Küche reserve", room: WG_R03, devices: [keine], model: eacWSZ-50A, impulse: 1000 }
   S15: { name: "Abwaschmaschine", room: WG_R03, devices: [spuelmaschine], model: eacWSZ-50A, impulse: 1000 }
-  S35: { name: "Herd", room: WG_R03, devices: [herd], model: eacDSZ-63A, impulse: 800 }
-
+  
   # OG
   S16: { name: "Licht & Steckdosen", room: OG_R01, devices: [licht, steckdosen], model: eacWSZ-50A, impulse: 1000 }
-
   S17: { name: "Kinderzimmer 2", room: OG_R04, devices: [kinderzimmer_2], model: eacWSZ-50A, impulse: 1000 }
+  S18: { name: "Kinderzimmer Licht", room: OG_R04, devices: [kinderzimmer_1_reserve], model: eacWSZ-50A, impulse: 1000 }
   S19: { name: "Kinderzimmer 1", room: OG_R03, devices: [kinderzimmer_1], model: eacWSZ-50A, impulse: 1000 }
-
   S20: { name: "Schlafzimmer", room: OG_R05, devices: [schlafzimmer], model: eacWSZ-50A, impulse: 1000 }
   S25: { name: "Schlafzimmer Licht", room: OG_R05, devices: [licht], model: eacWSZ-50A, impulse: 1000 }
 
@@ -105,6 +104,7 @@ sensors:
 
   # Boiler / Waschen
   S34: { name: "Boiler", room: EG_R02, devices: [boiler], model: eacDSZ-63A, impulse: 800 }
+  S35: { name: "Herd", room: WG_R03, devices: [herd], model: eacDSZ-63A, impulse: 800 }
   S36: { name: "Waschmaschine & Trockner", room: EG_R02, devices: [waschmaschine, trockner], model: eacDSZ-63A, impulse: 800 }
 
   # Reserven

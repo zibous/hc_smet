@@ -251,7 +251,16 @@ export function renderPeriodStrip(onRangeChanged) {
   const savedCompare = localStorage.getItem("dash_compare") !== "false";
 
   let selectedLabel = localStorage.getItem("dash_btn_label") || "Heute";
-  let activeRange = savedRange || getPeriodRange("heute");
+
+  // Relative Zeiträume immer neu berechnen (nicht den alten Timestamp verwenden)
+  const relativePeriods = { "Heute": "heute", "Gestern": "gestern", "Diese Woche": "woche",
+    "Letzte 7 Tage": "7tage", "Letzte 30 Tage": "30tage", "Dieser Monat": "monat" };
+  let activeRange;
+  if (relativePeriods[selectedLabel]) {
+    activeRange = getPeriodRange(relativePeriods[selectedLabel]);
+  } else {
+    activeRange = savedRange || getPeriodRange("heute");
+  }
 
   const currentYear = new Date().getFullYear();
   let optionsHtml = `<option value="" disabled selected>Jahr auswählen...</option>`;
