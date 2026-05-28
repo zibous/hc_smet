@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ app_title }}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<style>
+:root{--bg:#f5f5f5;--bg2:#fff;--fg:#1a1a2e;--fg2:#666;--accent:#4361ee;--border:#e0e0e0;--shadow:0 2px 8px rgba(0,0,0,.08);
+  --good:#2ec4b6;--ok:#f4a261;--bad:#e63946;--neutral:var(--fg2)}
+[data-theme=dark]{--bg:#0f0f1a;--bg2:#1a1a2e;--fg:#e0e0e0;--fg2:#999;--accent:#4cc9f0;--border:#2a2a3e;--shadow:0 2px 8px rgba(0,0,0,.3);color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--fg);transition:background .3s,color .3s}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.2rem;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.hdr h1{font-size:1.2rem;font-weight:600}
+.ctl{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.ctl select,.ctl input,.ctl button{padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:.8rem;cursor:pointer}
+.ctl button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ctl input[type=date]{width:130px}
+.ctl input[type=color]{width:32px;height:28px;padding:1px;border-radius:6px;cursor:pointer}
+.wrap{max-width:1400px;margin:0 auto;padding:.8rem}
+.loading{text-align:center;padding:2rem;color:var(--fg2);font-size:.9rem}
+/* Info-Zeile mit Avatar */
+.info-bar{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;padding:.5rem .8rem;background:var(--bg2);border-radius:10px;box-shadow:var(--shadow)}
+.info-bar .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.info-bar .info-text{font-size:.85rem;color:var(--fg2)}
+.info-bar .info-text strong{color:var(--fg);font-size:.95rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1rem}
+.card{background:var(--bg2);border-radius:10px;padding:.7rem .5rem;box-shadow:var(--shadow);text-align:center;border-top:3px solid var(--border);transition:border-color .3s}
+.card.good{border-top-color:var(--good)}.card.ok{border-top-color:var(--ok)}.card.bad{border-top-color:var(--bad)}
+.card .lb{font-size:.6rem;color:var(--fg2);text-transform:uppercase;letter-spacing:.5px}
+.card .vl{font-size:1.3rem;font-weight:700;margin:.15rem 0}
+.card .un{font-size:.65rem;color:var(--fg2)}
+.card .rt{font-size:.6rem;font-weight:600;margin-top:.15rem}
+.card .rt.good{color:var(--good)}.card .rt.ok{color:var(--ok)}.card .rt.bad{color:var(--bad)}
+.card .dl{font-size:.65rem;margin-top:.1rem}
+.dl.up{color:#e63946}.dl.dn{color:#2ec4b6}.dl.eq{color:var(--fg2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.cw{background:var(--bg2);border-radius:10px;padding:.8rem;box-shadow:var(--shadow);margin-bottom:.8rem}
+.cw h3{font-size:.85rem;margin-bottom:.4rem;color:var(--fg2)}
+.cw canvas{width:100%!important;height:300px!important}
+.row2 .cw canvas{height:280px!important}
+.summary{display:flex;flex-wrap:wrap;gap:.3rem .8rem;padding:.5rem 0 0;border-top:1px solid var(--border);margin-top:.5rem;font-size:.7rem;color:var(--fg2)}
+.summary span{white-space:nowrap}
+.summary .sl{font-weight:600;color:var(--fg)}
+.ft{text-align:center;padding:.8rem;font-size:.7rem;color:var(--fg2)}
+@media(max-width:768px){.row2{grid-template-columns:1fr}.cards{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:480px){.cards{grid-template-columns:repeat(3,1fr)}.card .vl{font-size:1rem}.hdr{flex-direction:column}.info-bar .avatar{width:36px;height:36px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>{{ app_title }}</h1>
+  <div class="ctl">
+    <select id="uSel"></select>
+    <input type="date" id="dFrom" title="Von">
+    <input type="date" id="dTo" title="Bis">
+    <button id="goBtn">&#9654;</button>
+    <button id="p30">30d</button><button id="p90">90d</button><button id="p365">1J</button><button id="pAll">All</button>
+    <button id="csvBtn" title="CSV Export">&#128190; CSV</button>
+    <input type="color" id="bgColor" title="Hintergrundfarbe">
+    <button id="bgReset" title="Farbe zurücksetzen">&#8634;</button>
+    <button id="thBtn">&#9790;</button>
+  </div>
+</div>
+<div class="wrap">
+  <div id="loadBox" class="loading">Lade Daten...</div>
+  <div id="content" style="display:none">
+    <div class="info-bar" id="infoBar">
+      <img class="avatar" id="avatar" src="" alt="Avatar">
+      <div class="info-text" id="infoText"></div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="cw"><h3 class="ct">Gewicht (mit Trend) &amp; Fettfreie Masse</h3><canvas id="c1"></canvas><div class="summary" id="s1"></div></div>
+    <div class="row2">
+      <div class="cw"><h3 class="ct">Zusammenfassung (Gewicht / Muskeln / BMI)</h3><canvas id="c2"></canvas><div class="summary" id="s2"></div></div>
+      <div class="cw"><h3 class="ct">Körperfett &amp; Viszeralfett</h3><canvas id="c3"></canvas><div class="summary" id="s3"></div></div>
+    </div>
+    <div class="row2">
+      <div class="cw"><h3 class="ct">Muskeln &amp; Protein</h3><canvas id="c4"></canvas><div class="summary" id="s4"></div></div>
+      <div class="cw"><h3 class="ct">Körperwerte (normalisiert)</h3><canvas id="c5"></canvas><div class="summary" id="s5"></div></div>
+    </div>
+    <div class="row2">
+      <div class="cw"><h3 class="ct">Makronährstoffe (kcal/Tag)</h3><canvas id="c6"></canvas><div class="summary" id="s6"></div></div>
+      <div class="cw"><h3 class="ct" id="c7title">Veränderung</h3><canvas id="c7"></canvas><div class="summary" id="s7"></div></div>
+    </div>
+  </div>
+</div>
+<div class="ft">home-miscale &bull; v2.1.0  </div>
+
+<script>
+const $=s=>document.querySelector(s);
+// Basis-Pfad erkennen (für NGINX Reverse Proxy mit Subpfad)
+const BASE={{ base_url | tojson }};
+let CH={},curSex='male',curTarget=70,curAvatar='';
+const gc=()=>document.documentElement.getAttribute('data-theme')==='dark'?'rgba(255,255,255,.07)':'rgba(0,0,0,.05)';
+const tc=()=>document.documentElement.getAttribute('data-theme')==='dark'?'#ccc':'#666';
+
+// ── Hintergrundfarbe ──
+function applyBgColor(c){
+  if(c){document.documentElement.style.setProperty('--bg',c);localStorage.setItem('dash_bg',c);$('#bgColor').value=c}
+  else{document.documentElement.style.removeProperty('--bg');localStorage.removeItem('dash_bg')}
+}
+$('#bgColor').oninput=function(){applyBgColor(this.value)};
+$('#bgReset').onclick=()=>{applyBgColor(null);$('#bgColor').value=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()};
+(function(){const c=localStorage.getItem('dash_bg');if(c)applyBgColor(c)})();
+
+// ── Theme ──
+let _lastData=null,_lastPrev=null;
+function applyChartDefaults(){
+  const c=tc();
+  Chart.defaults.color=c;
+  Chart.defaults.borderColor=gc();
+}
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t);$('#thBtn').textContent=t==='dark'?'\u2600':'\u263E';applyChartDefaults();
+  // Hintergrundfarbe beibehalten
+  const bg=localStorage.getItem('dash_bg');if(bg)applyBgColor(bg);
+  if(_lastData){renderCards(_lastData);renderAll(_lastData,_lastPrev)}}
+$('#thBtn').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+setTheme(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+
+// ── Bewertung ──
+const RANGES={
+  male:{
+    bmi:    {good:[18.5,25], ok:[25,28]},
+    fat:    {good:[8,20],    ok:[20,25]},
+    muscle: {good:[49,60],   ok:[44,49]},
+    water:  {good:[55,65],   ok:[50,55]},
+    visceral:{good:[1,10],   ok:[10,15]},
+    protein:{good:[16,22],   ok:[14,16]},
+    lbm:    {good:[50,62],   ok:[45,50]},
+    poi:    {good:[11,15],   ok:[15,17]},
+  },
+  female:{
+    bmi:    {good:[18.5,25], ok:[25,28]},
+    fat:    {good:[15,25],   ok:[25,32]},
+    muscle: {good:[36,43],   ok:[33,36]},
+    water:  {good:[45,60],   ok:[40,45]},
+    visceral:{good:[1,10],   ok:[10,15]},
+    protein:{good:[14,22],   ok:[12,14]},
+    lbm:    {good:[38,50],   ok:[34,38]},
+    poi:    {good:[11,15],   ok:[15,17]},
+  }
+};
+
+function rate(key,val){
+  if(key==='weight'){
+    const diff=Math.abs(val-curTarget);
+    if(diff<=2)return{cls:'good',txt:'Gut (Ziel: '+curTarget+')'};
+    if(diff<=5)return{cls:'ok',txt:(val>curTarget?'Über':'Unter')+' Ziel ('+curTarget+')'};
+    return{cls:'bad',txt:(val>curTarget?'Weit über':'Weit unter')+' Ziel ('+curTarget+')'};
+  }
+  const r=(RANGES[curSex]||RANGES.male)[key];
+  if(!r)return{cls:'',txt:''};
+  if(val>=r.good[0]&&val<=r.good[1])return{cls:'good',txt:'Gut'};
+  if(val>=r.ok[0]&&val<=r.ok[1])return{cls:'ok',txt:'Akzeptabel'};
+  return{cls:'bad',txt:val<r.good[0]?'Zu niedrig':'Zu hoch'};
+}
+
+// ── Controls ──
+function localDate(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+function setRange(d){const t=new Date(),f=new Date();f.setDate(f.getDate()-d);$('#dFrom').value=localDate(f);$('#dTo').value=localDate(t);loadData()}
+$('#p30').onclick=()=>{localStorage.setItem('dash_preset','30');localStorage.removeItem('dash_from');localStorage.removeItem('dash_to');setRange(30)};
+$('#p90').onclick=()=>{localStorage.setItem('dash_preset','90');localStorage.removeItem('dash_from');localStorage.removeItem('dash_to');setRange(90)};
+$('#p365').onclick=()=>{localStorage.setItem('dash_preset','365');localStorage.removeItem('dash_from');localStorage.removeItem('dash_to');setRange(365)};
+$('#pAll').onclick=()=>{$('#dFrom').value='';$('#dTo').value='';localStorage.removeItem('dash_from');localStorage.removeItem('dash_to');localStorage.removeItem('dash_preset');loadData()};
+$('#goBtn').onclick=()=>{localStorage.removeItem('dash_preset');loadData()};$('#uSel').onchange=()=>loadData();
+$('#csvBtn').onclick=()=>{const u=$('#uSel').value,f=$('#dFrom').value,t=$('#dTo').value;let url=BASE+'/dashboard/api/export?user='+u;if(f)url+='&from='+f;if(t)url+='&to='+t;window.location.href=url};
+
+let usersData=[];
+fetch(BASE+'/dashboard/api/users').then(r=>r.json()).then(us=>{
+  usersData=us;
+  us.forEach(u=>{const o=document.createElement('option');o.value=u.name;o.textContent=u.name+' ('+u.count+')';$('#uSel').appendChild(o)});
+  const su=localStorage.getItem('dash_user');
+  if(su){$('#uSel').value=su}
+  const sp=localStorage.getItem('dash_preset');
+  const sf=localStorage.getItem('dash_from');
+  const st=localStorage.getItem('dash_to');
+  if(sp){setRange(parseInt(sp))}
+  else if(sf&&st){$('#dFrom').value=sf;$('#dTo').value=st;loadData()}
+  else{setRange(365)}
+});
+
+function loadData(){
+  $('#loadBox').style.display='block';$('#content').style.display='none';
+  applyChartDefaults();
+  const u=$('#uSel').value,f=$('#dFrom').value,t=$('#dTo').value;
+  if(u)localStorage.setItem('dash_user',u);
+  localStorage.setItem('dash_from',f||'');
+  localStorage.setItem('dash_to',t||'');
+  // Sex + Avatar aus usersData (statt hardcoded)
+  const ud=usersData.find(x=>x.name.toLowerCase()===u.toLowerCase());
+  curSex=ud&&ud.sex?ud.sex:'male';
+  curTarget=ud&&ud.target_weight?ud.target_weight:70;
+  curAvatar=ud&&ud.avatar?BASE+ud.avatar:'';
+  let url=BASE+'/dashboard/api/data?user='+u;
+  if(f)url+='&from='+f;if(t)url+='&to='+t;
+
+  let prevUrl=null;
+  if(f){prevUrl=BASE+'/dashboard/api/data?user='+u+'&before='+f+'&limit=60'}
+
+  const mainFetch=fetch(url).then(r=>r.json());
+  const prevFetch=prevUrl?fetch(prevUrl).then(r=>r.json()).catch(()=>null):Promise.resolve(null);
+
+  Promise.all([mainFetch,prevFetch]).then(([d,p])=>{
+    $('#loadBox').style.display='none';$('#content').style.display='block';
+    const prevData=p&&p.data&&p.data.length?p.data:null;
+    renderInfoBar(d.data,u);
+    renderCards(d.data);
+    renderAll(d.data,prevData);
+  });
+}
+
+setInterval(()=>{if($('#content').style.display!=='none')loadData()},300000);
+
+// ── Info-Zeile mit Avatar ──
+function renderInfoBar(D,userName){
+  const bar=$('#infoBar');
+  const img=$('#avatar');
+  const txt=$('#infoText');
+  if(!D.length){bar.style.display='none';return}
+  bar.style.display='flex';
+  img.src=curAvatar||BASE+'/dashboard/avatar/'+userName.toLowerCase();
+  const L=D[D.length-1];
+  const ts=L.timestamp||'';
+  const zeit=ts.includes('T')?ts.split('T')[1].slice(0,5):'';
+  const datum=L.date||'';
+  txt.innerHTML='<strong>Letzte Messung '+datum+(zeit?' · '+zeit+' Uhr':'')+'</strong><br>'+D.length+' Messungen im Zeitraum';
+}
+
+// ── Cards (ohne "Letzte Messung"-Kachel) ──
+function renderCards(D){
+  if(!D.length){$('#cards').innerHTML='<p>Keine Daten</p>';return}
+  const L=D[D.length-1],P=D.length>1?D[D.length-2]:null;
+  const F=[
+    {k:'weight',l:'Gewicht',u:'kg',d:1},
+    {k:'fat',l:'Fett',u:'%',d:1},{k:'muscle',l:'Muskel',u:'%',d:1},
+    {k:'water',l:'Wasser',u:'%',d:1},{k:'bmi',l:'BMI',u:'',d:1},
+    {k:'visceral',l:'Viszeral',u:'',d:1},{k:'protein',l:'Protein',u:'%',d:1},
+    {k:'lbm',l:'LBM',u:'kg',d:1},{k:'poi',l:'POI',u:'',d:2},
+  ];
+  let h='';
+  F.forEach(f=>{
+    const v=L[f.k];if(v==null)return;
+    const r=rate(f.k,v);
+    let dh='';
+    if(P&&P[f.k]!=null){const d=v-P[f.k],c=d>.01?'up':d<-.01?'dn':'eq',a=d>.01?'\u25B2':d<-.01?'\u25BC':'\u25CF';dh='<div class="dl '+c+'">'+a+' '+Math.abs(d).toFixed(f.d)+'</div>'}
+    const rh=r.txt?'<div class="rt '+r.cls+'">'+r.txt+'</div>':'';
+    h+='<div class="card '+r.cls+'"><div class="lb">'+f.l+'</div><div class="vl">'+v.toFixed(f.d)+'</div><div class="un">'+f.u+'</div>'+rh+dh+'</div>';
+  });
+  $('#cards').innerHTML=h;
+}
+
+// ── Chart Helpers ──
+function mk(id,cfg){if(CH[id])CH[id].destroy();CH[id]=new Chart(document.getElementById(id),cfg)}
+function ds(l,D,k,c,opts={}){return{label:l,data:D.map(d=>(d[k]!=null&&d[k]!==0)?d[k]:null),borderColor:c,backgroundColor:c+'22',fill:false,borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:.3,spanGaps:true,...opts}}
+function legendCfg(){return{usePointStyle:true,pointStyle:'circle',boxWidth:6,color:tc(),generateLabels:function(chart){return chart.data.datasets.map(function(d,i){return{text:d.label,fontColor:tc(),fillStyle:d.borderColor||d.backgroundColor,strokeStyle:d.borderColor||d.backgroundColor,pointStyle:'circle',hidden:!chart.isDatasetVisible(i),datasetIndex:i}})}}}
+function timeX(t,D){
+  return{type:'category',grid:{color:gc()},title:{display:!!t,text:t,color:tc()},ticks:{color:tc(),maxRotation:45,autoSkip:true,maxTicksLimit:15}}
+}
+function linY(t,p){return{type:'linear',position:p||'left',title:{display:!!t,text:t,color:tc()},grid:{color:p==='right'?'transparent':gc()},ticks:{color:tc()}}}
+
+function sma(D,k,n=7){
+  const r=[];
+  for(let i=0;i<D.length;i++){
+    let s=0,c=0;
+    for(let j=Math.max(0,i-n+1);j<=i;j++){if(D[j][k]!=null&&D[j][k]!==0){s+=D[j][k];c++}}
+    r.push(c?+(s/c).toFixed(2):null);
+  }
+  return r;
+}
+
+function stats(D,fields){
+  const res={};
+  fields.forEach(f=>{
+    const vals=D.map(d=>d[f.k]).filter(v=>v!=null&&v!==0);
+    if(!vals.length)return;
+    const mid=Math.floor(vals.length/2);
+    const avg1=vals.slice(0,mid).reduce((a,b)=>a+b,0)/(mid||1);
+    const avg2=vals.slice(mid).reduce((a,b)=>a+b,0)/((vals.length-mid)||1);
+    const diff=avg2-avg1;
+    let trend,tcls;
+    if(Math.abs(diff)<0.3){trend='\u2192 stabil';tcls='eq'}
+    else if(diff>0){trend='\u2197 +'+Math.abs(diff).toFixed(1);tcls='up'}
+    else{trend='\u2198 '+Math.abs(diff).toFixed(1);tcls='dn'}
+    res[f.l]={cur:vals[vals.length-1],avg:+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(f.d||1),min:+Math.min(...vals).toFixed(f.d||1),max:+Math.max(...vals).toFixed(f.d||1),trend,tcls};
+  });
+  return res;
+}
+function renderSummary(id,D,fields,prevD){
+  const s=stats(D,fields);
+  const ps=prevD?stats(prevD,fields):null;
+  const moreIsGood={Muskeln:1,Protein:1,Wasser:1,LBM:1};
+  let h='';
+  for(const[label,v]of Object.entries(s)){
+    h+=`<span><b>${label}:</b> Aktuell <span class="sl">${v.cur}</span> · \u00D8 ${v.avg}`;
+    if(ps&&ps[label]){
+      const diff=+(v.avg-ps[label].avg).toFixed(1);
+      const inv=!!moreIsGood[label];
+      const cls=Math.abs(diff)<=0.05?'eq':((diff>0)===inv?'dn':'up');
+      const arrow=diff>0.05?'\u25B2':diff<-0.05?'\u25BC':'\u25CF';
+      h+=` · Vorperiode \u00D8 ${ps[label].avg} <span class="dl ${cls}">${arrow} ${Math.abs(diff).toFixed(1)}</span>`;
+    }
+    h+=`</span> `;
+  }
+  const el=document.getElementById(id);
+  if(el)el.innerHTML=h;
+}
+
+const _baseTitles=[];
+document.querySelectorAll('h3.ct').forEach(el=>{_baseTitles.push({el,base:el.textContent})});
+function updateTitles(){
+  const f=$('#dFrom').value,t=$('#dTo').value;
+  let suffix='';
+  if(f&&t){
+    const days=Math.round((new Date(t+'T00:00:00')-new Date(f+'T00:00:00'))/864e5);
+    suffix=days>0?' ('+days+' Tage)':'';
+  }
+  _baseTitles.forEach(t=>{if(t.el.id!=='c7title')t.el.textContent=t.base+suffix});
+  return suffix;
+}
+
+// ── Render All Charts ──
+function renderAll(D,prevD){
+  if(!D.length)return;
+  _lastData=D;_lastPrev=prevD;
+  const daySuffix=updateTitles();
+  const L=D[D.length-1];
+
+  // C1: Gewicht + Trend + LBM
+  const labels=D.map(d=>d.date);
+  mk('c1',{type:'line',data:{labels:labels,datasets:[
+    ds('Gewicht',D,'weight','#4361ee',{fill:true,backgroundColor:'rgba(67,97,238,.12)'}),
+    {label:'Trend (7d)',data:sma(D,'weight'),borderColor:'#ff6b6b',borderWidth:2,borderDash:[6,3],pointRadius:0,tension:.4,fill:false,spanGaps:true},
+    ds('Fettfreie Masse',D,'lbm','#2ec4b6',{fill:true,backgroundColor:'rgba(46,196,182,.08)'})
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:legendCfg()}},scales:{x:timeX('',D),y:linY('kg')}}});
+
+  // C2: Zusammenfassung (Nullwerte werden durch ds() als null gesetzt → spanGaps überbrückt)
+  mk('c2',{type:'line',data:{labels:labels,datasets:[
+    ds('Gewicht',D,'weight','#03a9f4',{yAxisID:'left'}),
+    ds('Muskeln',D,'muscle','#f1c40f',{yAxisID:'left'}),
+    {label:'BMI',data:D.map(d=>(d.bmi!=null&&d.bmi!==0)?d.bmi:null),type:'bar',yAxisID:'right',backgroundColor:'#e74c3c',borderColor:'#e74c3c',borderWidth:1,barPercentage:.4}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:legendCfg()}},scales:{x:timeX('',D),left:linY('Gewicht / Muskeln','left'),right:linY('BMI','right')}}});
+
+  // C3: Fett & Viszeral
+  mk('c3',{type:'line',data:{labels:labels,datasets:[
+    ds('Körperfett',D,'fat','#ef5a28',{fill:true,backgroundColor:'rgba(239,90,40,.15)'}),
+    ds('Viszeralfett',D,'visceral','#fe7383',{fill:true,backgroundColor:'rgba(254,115,131,.15)'})
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:legendCfg()}},scales:{x:timeX('',D),y:linY('%')}}});
+
+  // C4: Muskeln & Protein
+  mk('c4',{type:'line',data:{labels:labels,datasets:[
+    ds('Muskeln',D,'muscle','#fa8714',{fill:true,backgroundColor:'rgba(250,135,20,.12)',yAxisID:'left'}),
+    ds('Protein',D,'protein','#eab839',{fill:true,backgroundColor:'rgba(234,184,57,.12)',yAxisID:'right'})
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:legendCfg()}},scales:{x:timeX('',D),left:linY('Muskeln %','left'),right:linY('Protein %','right')}}});
+
+  // C5: Radar normalisiert (0-100%)
+  const rng=RANGES[curSex]||RANGES.male;
+  function norm(k,v){const r=rng[k];if(!r)return 50;const mid=(r.good[0]+r.good[1])/2;const span=r.good[1]-r.good[0];return Math.max(0,Math.min(100,50+((v-mid)/span)*50))}
+  const radarFields=[
+    {k:'fat',l:'Fett'},{k:'water',l:'Wasser'},{k:'muscle',l:'Muskeln'},
+    {k:'protein',l:'Protein'},{k:'bmi',l:'BMI'},{k:'visceral',l:'Viszeral'}
+  ];
+  mk('c5',{type:'radar',data:{
+    labels:radarFields.map(f=>f.l+' ('+L[f.k]+')'),
+    datasets:[{
+      label:'Aktuell (normalisiert)',
+      data:radarFields.map(f=>norm(f.k,L[f.k])),
+      backgroundColor:'rgba(67,97,238,.15)',borderColor:'#4361ee',pointBackgroundColor:radarFields.map(f=>{const r=rate(f.k,L[f.k]);return r.cls==='good'?'#2ec4b6':r.cls==='ok'?'#f4a261':'#e63946'}),
+      borderWidth:2,pointRadius:5
+    },{
+      label:'Optimal (50)',data:radarFields.map(()=>50),
+      backgroundColor:'transparent',borderColor:'rgba(46,196,182,.4)',borderWidth:1,borderDash:[4,4],pointRadius:0
+    }]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:6,color:tc()}}},scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:'rgba(100,100,100,.15)'},angleLines:{color:'rgba(100,100,100,.1)'},pointLabels:{color:tc(),font:{size:11}}}}}});
+
+  // C6: Makronährstoffe
+  const act=curSex==='female'?1.5:2.1;
+  const tdee=Math.round(L.weight*14.916+877.8-175*0.726-70*8.976)*act;
+  const prot=Math.round(tdee*.35),carb=Math.round(tdee*.50),fat=Math.round(tdee*.15);
+  mk('c6',{type:'bar',data:{
+    labels:['Protein\n'+prot+' kcal','Kohlenhydrate\n'+carb+' kcal','Fett\n'+fat+' kcal'],
+    datasets:[{data:[prot,carb,fat],backgroundColor:['#FDD835','#009688','#e74c3c'],borderWidth:0,borderRadius:6}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'TDEE ~'+Math.round(tdee)+' kcal/Tag',color:tc()}},scales:{y:linY('kcal')}}});
+
+  // C7: Veränderung – adaptiv: täglich (<60 Tage) oder monatlich
+  const c7Title=document.getElementById('c7title');
+  const c7Canvas=document.getElementById('c7');
+  const spanDays=D.length>1?Math.round((new Date(D[D.length-1].date)-new Date(D[0].date))/(864e5)):0;
+
+  if(D.length>=2&&spanDays<60){
+    if(c7Title)c7Title.textContent='Tägliche Veränderung'+daySuffix;
+    c7Canvas.style.display='';
+    const nb=c7Canvas.parentElement.querySelector('.no-data');if(nb)nb.remove();
+    const dDelta=[];
+    for(let i=1;i<D.length;i++){dDelta.push({d:D[i].date,fat:+(D[i].fat-D[i-1].fat).toFixed(2),muscle:+(D[i].muscle-D[i-1].muscle).toFixed(2),water:+(D[i].water-D[i-1].water).toFixed(2)})}
+    mk('c7',{type:'bar',data:{
+      labels:dDelta.map(d=>d.d),
+      datasets:[
+        {label:'Fett',data:dDelta.map(d=>d.fat),backgroundColor:dDelta.map(d=>d.fat>0?'rgba(231,76,60,.7)':'rgba(46,196,182,.7)'),borderColor:'#e74c3c'},
+        {label:'Muskeln',data:dDelta.map(d=>d.muscle),backgroundColor:dDelta.map(d=>d.muscle>0?'rgba(46,196,182,.7)':'rgba(231,76,60,.7)'),borderColor:'#2ec4b6'},
+        {label:'Wasser',data:dDelta.map(d=>d.water),backgroundColor:'rgba(52,152,219,.5)',borderColor:'#3498db'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:legendCfg()}},
+      scales:{x:{grid:{color:gc()},ticks:{color:tc()}},y:{title:{display:true,text:'Änderung zum Vortag',color:tc()},grid:{color:gc()},ticks:{color:tc()}}}}});
+  } else {
+    if(c7Title)c7Title.textContent='Monatliche Veränderung'+daySuffix;
+    const months={};
+    D.forEach(d=>{const m=d.date.slice(0,7);if(!months[m])months[m]={fat:[],muscle:[],water:[]};months[m].fat.push(d.fat);months[m].muscle.push(d.muscle);months[m].water.push(d.water)});
+    const mKeys=Object.keys(months).sort();
+    const mAvg=mKeys.map(m=>({m,fat:months[m].fat.reduce((a,b)=>a+b,0)/months[m].fat.length,muscle:months[m].muscle.reduce((a,b)=>a+b,0)/months[m].muscle.length,water:months[m].water.reduce((a,b)=>a+b,0)/months[m].water.length}));
+    const mDelta=[];
+    for(let i=1;i<mAvg.length;i++){mDelta.push({m:mAvg[i].m,fat:+(mAvg[i].fat-mAvg[i-1].fat).toFixed(2),muscle:+(mAvg[i].muscle-mAvg[i-1].muscle).toFixed(2),water:+(mAvg[i].water-mAvg[i-1].water).toFixed(2)})}
+    c7Canvas.style.display='';
+    const nb=c7Canvas.parentElement.querySelector('.no-data');if(nb)nb.remove();
+    if(mDelta.length<1){
+      if(CH['c7']){CH['c7'].destroy();delete CH['c7']}
+      c7Canvas.style.display='none';
+      let nb2=c7Canvas.parentElement.querySelector('.no-data');
+      if(!nb2){nb2=document.createElement('div');nb2.className='no-data';nb2.style.cssText='display:flex;align-items:center;justify-content:center;height:280px;color:var(--fg2);font-size:.85rem;';c7Canvas.parentElement.insertBefore(nb2,c7Canvas)}
+      nb2.textContent='Nicht genug Daten für Veränderungsanzeige';
+    } else {
+      mk('c7',{type:'bar',data:{
+        labels:mDelta.map(d=>d.m),
+        datasets:[
+          {label:'Fett',data:mDelta.map(d=>d.fat),backgroundColor:mDelta.map(d=>d.fat>0?'rgba(231,76,60,.7)':'rgba(46,196,182,.7)'),borderColor:'#e74c3c'},
+          {label:'Muskeln',data:mDelta.map(d=>d.muscle),backgroundColor:mDelta.map(d=>d.muscle>0?'rgba(46,196,182,.7)':'rgba(231,76,60,.7)'),borderColor:'#2ec4b6'},
+          {label:'Wasser',data:mDelta.map(d=>d.water),backgroundColor:'rgba(52,152,219,.5)',borderColor:'#3498db'}
+        ]
+      },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{labels:legendCfg()}},
+        scales:{x:{grid:{color:gc()},ticks:{color:tc()}},y:{title:{display:true,text:'Ø Änderung zum Vormonat',color:tc()},grid:{color:gc()},ticks:{color:tc()}}}}});
+    }
+  }
+
+  // Zusammenfassungen
+  renderSummary('s1',D,[{k:'weight',l:'Gewicht',d:1},{k:'lbm',l:'LBM',d:1}],prevD);
+  renderSummary('s2',D,[{k:'weight',l:'Gewicht',d:1},{k:'muscle',l:'Muskeln',d:1},{k:'bmi',l:'BMI',d:1}],prevD);
+  renderSummary('s3',D,[{k:'fat',l:'Fett',d:1},{k:'visceral',l:'Viszeral',d:1}],prevD);
+  renderSummary('s4',D,[{k:'muscle',l:'Muskeln',d:1},{k:'protein',l:'Protein',d:1}],prevD);
+
+  const s5el=document.getElementById('s5');
+  if(s5el){
+    const rf=radarFields;
+    const PL=prevD&&prevD.length?prevD[prevD.length-1]:null;
+    let h='';rf.forEach(f=>{
+      const r=rate(f.k,L[f.k]);
+      h+=`<span><b>${f.l}:</b> <span class="sl">${L[f.k]}</span> <span class="rt ${r.cls}">${r.txt}</span>`;
+      if(PL&&PL[f.k]!=null){const d=+(L[f.k]-PL[f.k]).toFixed(1);const cls=d>0.05?'up':d<-0.05?'dn':'eq';const a=d>0.05?'\u25B2':d<-0.05?'\u25BC':'\u25CF';h+=` <span class="dl ${cls}">${a} ${Math.abs(d).toFixed(1)}</span>`}
+      h+=`</span> `;
+    });
+    s5el.innerHTML=h;
+  }
+
+  const s6el=document.getElementById('s6');
+  if(s6el){s6el.innerHTML=`<span><b>TDEE:</b> <span class="sl">~${Math.round(tdee)} kcal</span></span> <span><b>Protein:</b> ${prot} kcal (35%)</span> <span><b>Kohlenhydrate:</b> ${carb} kcal (50%)</span> <span><b>Fett:</b> ${fat} kcal (15%)</span>`}
+
+  const s7el=document.getElementById('s7');
+  if(s7el){
+    if(D.length>=2&&spanDays<60){
+      const last=D[D.length-1],prev=D[D.length-2];
+      const df={fat:+(last.fat-prev.fat).toFixed(2),muscle:+(last.muscle-prev.muscle).toFixed(2),water:+(last.water-prev.water).toFixed(2)};
+      const fmt=(v,inv)=>{const cls=v>0.05?(inv?'dn':'up'):v<-0.05?(inv?'up':'dn'):'eq';const a=v>0.05?'\u25B2':v<-0.05?'\u25BC':'\u25CF';return`<span class="dl ${cls}">${a} ${Math.abs(v).toFixed(1)}</span>`};
+      s7el.innerHTML=`<span><b>Letzte Änderung (${last.date}):</b></span> <span>Fett ${fmt(df.fat,false)}</span> <span>Muskeln ${fmt(df.muscle,true)}</span> <span>Wasser ${fmt(df.water,true)}</span>`;
+    } else {
+      const months2={};
+      D.forEach(d=>{const m=d.date.slice(0,7);if(!months2[m])months2[m]={fat:[],muscle:[],water:[]};months2[m].fat.push(d.fat);months2[m].muscle.push(d.muscle);months2[m].water.push(d.water)});
+      const mk2=Object.keys(months2).sort();
+      const ma2=mk2.map(m=>({m,fat:months2[m].fat.reduce((a,b)=>a+b,0)/months2[m].fat.length,muscle:months2[m].muscle.reduce((a,b)=>a+b,0)/months2[m].muscle.length,water:months2[m].water.reduce((a,b)=>a+b,0)/months2[m].water.length}));
+      const md2=[];for(let i=1;i<ma2.length;i++){md2.push({m:ma2[i].m,fat:+(ma2[i].fat-ma2[i-1].fat).toFixed(2),muscle:+(ma2[i].muscle-ma2[i-1].muscle).toFixed(2),water:+(ma2[i].water-ma2[i-1].water).toFixed(2)})}
+      if(md2.length){
+        const last=md2[md2.length-1];
+        const fmt=(v,inv)=>{const cls=v>0.05?(inv?'dn':'up'):v<-0.05?(inv?'up':'dn'):'eq';const a=v>0.05?'\u25B2':v<-0.05?'\u25BC':'\u25CF';return`<span class="dl ${cls}">${a} ${Math.abs(v).toFixed(1)}</span>`};
+        s7el.innerHTML=`<span><b>Letzter Monat (${last.m}):</b></span> <span>Fett ${fmt(last.fat,false)}</span> <span>Muskeln ${fmt(last.muscle,true)}</span> <span>Wasser ${fmt(last.water,true)}</span>`;
+      } else {s7el.innerHTML=''}
+    }
+  }
+}
+</script>
+</body>
+</html>

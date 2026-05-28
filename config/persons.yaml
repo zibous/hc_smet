@@ -1,0 +1,34 @@
+users:
+  - name: Peter
+    sex: male
+    height: 175
+    dob: "1955-12-16"
+    athletic: true
+    activity: 2.1
+    weight_threshold: 70
+    scores:
+      WEIGHT: 70
+      FAT: 11.5
+      VISCERAL: 7
+      MUSCLE: 56
+      WATER: 55
+      BONES: 3.7
+      BMR: 2200
+      PROTEIN: 22
+
+  - name: Reni
+    sex: female
+    height: 165
+    dob: "1960-01-01"
+    athletic: false
+    activity: 1.5
+    weight_threshold: 54
+    scores:
+      WEIGHT: 54
+      FAT: 15.5
+      VISCERAL: 7
+      MUSCLE: 48
+      WATER: 57
+      BONES: 3.2
+      BMR: 1850
+      PROTEIN: 18

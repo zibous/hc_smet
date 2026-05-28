@@ -1,0 +1,235 @@
+substitutions:
+  hostname: "mismartscale2"
+  friendly_name: "MIScale"
+  device_description: "Mi Smart Scale 2 on ESP32"
+  projectname: "PeterSiebler.miscale"
+  appversion: "2.6.0"
+  location: "Schlafzimmer"
+  mac: "5C:CA:D3:4C:EE:74"
+  server_url: "http://10.1.1.119:5000/miscale"
+
+  log_level: "INFO"
+  log_baudrate: "0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+esphome:
+  name: ${hostname}
+  comment: ${device_description}
+  min_version: 2024.6.6
+  project:
+    name: ${projectname}
+    version: ${appversion}
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Miscale Fallback"
+    password: "miscale2fallback"
+
+captive_portal:
+
+logger:
+  level: ${log_level}
+  baud_rate: ${log_baudrate}
+
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: false
+
+time:
+  - platform: sntp
+    id: time_sntp
+    timezone: Europe/Berlin
+
+http_request:
+  useragent: esphome/miscale
+  verify_ssl: false
+  timeout: 10s
+
+# ─── Globals ─────────────────────────────────────────────
+
+globals:
+  - id: lastuserid
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_weight
+    type: float
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_impedance
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_weight_peter
+    type: float
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_impedance_peter
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_weight_reni
+    type: float
+    restore_value: yes
+    initial_value: "0"
+
+  - id: last_impedance_reni
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+# ─── Scripts ─────────────────────────────────────────────
+
+script:
+  - id: detect_user
+    then:
+      - lambda: |-
+          if (id(current_weight).has_state() && id(current_weight).state > 40.0) {
+            float w = id(current_weight).state;
+            if (w >= 60.0 && w <= 80.0) {
+              id(username).publish_state("Peter");
+              id(lastuserid) = 1;
+            } else if (w >= 45.0 && w <= 56.0) {
+              id(username).publish_state("Reni");
+              id(lastuserid) = 2;
+            } else {
+              id(username).publish_state("Gast");
+              id(lastuserid) = 0;
+            }
+          } else {
+            id(username).publish_state("Unbekannt");
+          }
+
+  - id: send_http
+    then:
+      - http_request.post:
+          url: ${server_url}
+          json: |-
+            root["id"] = id(lastuserid);
+            root["name"] = id(username).state;
+            root["weight"] = id(current_weight).state;
+            root["impedance"] = (int)id(current_impedance).state;
+            root["timestamp"] = id(lastmeasuredate).state;
+          on_response:
+            then:
+              - if:
+                  condition:
+                    lambda: return response->status_code == 200;
+                  then:
+                    - logger.log:
+                        level: INFO
+                        format: "HTTP OK: %s %.2f kg, impedance %d"
+                        args:
+                          - id(username).state.c_str()
+                          - id(current_weight).state
+                          - (int)id(current_impedance).state
+                  else:
+                    - logger.log:
+                        level: ERROR
+                        format: "HTTP Error: status %d"
+                        args:
+                          - response->status_code
+          on_error:
+            then:
+              - logger.log:
+                  level: ERROR
+                  format: "HTTP Request fehlgeschlagen – Server nicht erreichbar?"
+
+# ─── Sensoren ────────────────────────────────────────────
+
+sensor:
+  - platform: xiaomi_miscale
+    mac_address: ${mac}
+
+    weight:
+      name: "${friendly_name} Gewicht"
+      id: current_weight
+      unit_of_measurement: "kg"
+      accuracy_decimals: 2
+      state_class: measurement
+
+    impedance:
+      name: "${friendly_name} Impedance"
+      id: current_impedance
+      unit_of_measurement: "Ω"
+      accuracy_decimals: 0
+      state_class: measurement
+
+      on_value:
+        then:
+          - if:
+              condition:
+                lambda: |-
+                  return (
+                    id(current_weight).has_state() &&
+                    id(current_weight).state > 40.0 &&
+                    id(current_impedance).state > 200
+                  );
+              then:
+                - script.execute: detect_user
+
+                - lambda: |-
+                    id(last_weight) = id(current_weight).state;
+                    id(last_impedance) = (int)id(current_impedance).state;
+
+                    if (id(lastuserid) == 1) {
+                      id(last_weight_peter) = id(current_weight).state;
+                      id(last_impedance_peter) = (int)id(current_impedance).state;
+                    } else if (id(lastuserid) == 2) {
+                      id(last_weight_reni) = id(current_weight).state;
+                      id(last_impedance_reni) = (int)id(current_impedance).state;
+                    }
+
+                - text_sensor.template.publish:
+                    id: lastmeasuredate
+                    state: !lambda |-
+                      return id(time_sntp).now().strftime("%Y-%m-%dT%H:%M:%S");
+
+                - script.execute: send_http
+
+                - logger.log:
+                    level: INFO
+                    format: "Messung: %s %.2f kg, %d Ω"
+                    args:
+                      - id(username).state.c_str()
+                      - id(current_weight).state
+                      - (int)id(current_impedance).state
+
+  - platform: ble_rssi
+    mac_address: ${mac}
+    name: "${friendly_name} RSSI"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+
+  - platform: wifi_signal
+    name: "${friendly_name} WIFI Signal"
+    update_interval: 60s
+
+# ─── Text Sensoren ───────────────────────────────────────
+
+text_sensor:
+  - platform: template
+    name: "${friendly_name} Name"
+    id: username
+
+  - platform: template
+    name: "${friendly_name} Messung"
+    id: lastmeasuredate
