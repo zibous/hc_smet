@@ -104,6 +104,12 @@ test-v3: ## Alle v3 Tests
 graph: ## Klassen und Ablauf diagram
 	PYTHONPATH=. pyreverse -o png -p Smartmeterdata app
 
+git-update: ## Git Forgejo Update durchführen
+	git remote set-url origin http://10.1.1.119:3043/peter/hc_scale.git
+	git add -A
+	git commit -m "Update am $$(date +'%Y-%m-%d %H:%M')" || true
+	git push -u origin main
+
 # ---------------------------------------------------------
 # Help
 # ---------------------------------------------------------
