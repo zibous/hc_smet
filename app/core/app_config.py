@@ -224,6 +224,14 @@ class Settings(BaseSettings):
     HA_WEBHOOK_ID: str = ""
 
     # =================================================================
+    # KPI DASHBOARD
+    # =================================================================
+    KPI_APP_ID: str = "hc_smet"
+    KPI_APP_NAME: str = "SmartMeters"
+    KPI_ICON: str = "speed"
+    KPI_URL: str = "http://nuc:8096"
+
+    # =================================================================
     # SENSOR MAPPING
     # =================================================================
     MAPPING_ENABLED: bool = False

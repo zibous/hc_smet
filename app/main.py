@@ -13,6 +13,7 @@ from app.core.logging_setup import setup_logging
 from app.api.base import router as base_router
 from app.api.dashboard import router as dashboard_router
 from app.api.dashboard2 import router as dashboard2_router
+from app.api.kpi import router as kpi_router
 from app.api.settingsdata import router as settings_router
 
 from app.infrastructure.database.dbconnect import Database
@@ -150,6 +151,8 @@ app.include_router(base_router)
 app.include_router(dashboard_router)
 
 app.include_router(dashboard2_router)
+
+app.include_router(kpi_router)
 
 # POST-Endpoint NUR im POST-Modus registrieren (Kollisionsschutz)
 if settings.POKEY_SERVICE.upper() != "GET":
