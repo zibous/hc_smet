@@ -1,4 +1,4 @@
-# Makefile for hc_p1me
+# Makefile for hc-smet
 
 .DEFAULT_GOAL := help
 .PHONY: build up down restart rebuild logs logs-tail ps stop start shell health run dev install clean help
