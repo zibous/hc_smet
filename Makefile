@@ -110,6 +110,24 @@ git-update: ## Git Forgejo Update durchführen
 	git commit -m "Update am $$(date +'%Y-%m-%d %H:%M')" || true
 	git push -u origin main
 
+# 🔧 Komprimiert JS und CSS parallel über Docker – maximal optimiert
+jsbuild:
+	@echo "📦 Starte JS & CSS Bundling via Docker & esbuild..."
+	@docker run --rm -v "$$(pwd)":/app -w /app node:20-alpine sh -c "\
+		npx esbuild frontend/static/js/app.js --bundle --minify --sourcemap --target=es2020 --outfile=frontend/static/js/app.bundle.js && \
+		npx esbuild frontend/static/css/style.css --minify --sourcemap --outfile=frontend/static/css/style.bundle.css"
+	@echo "✅ Fertig! JS und CSS Bundles wurden erfolgreich im static-Ordner erstellt."
+
+jsclean:
+	@echo "🧼 Bereinige produktive Build-Dateien..."
+	@rm -f frontend/static/js/app.bundle.js
+	@rm -f frontend/static/js/app.bundle.js.map
+	@rm -f frontend/static/css/style.bundle.css
+	@rm -f frontend/static/css/style.bundle.css.map
+	@echo "✨ Verzeichnis ist wieder sauber."
+
+
+
 # ---------------------------------------------------------
 # Help
 # ---------------------------------------------------------
