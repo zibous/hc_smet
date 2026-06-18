@@ -1,21 +1,22 @@
+@import "./theme.css";
+@import "./live.css";
+
 /* ----------------------------------------------------
-   SMARTMETERS GLASS UI - THEME VARIABLES
+   SMARTMETERS GLASS UI - APP-SPEZIFISCHE VARIABLEN
 ---------------------------------------------------- */
 :root {
-    /* ☀️ Light Mode Theme Colors (Frost Look) */
+    /* Aliase für live.css Kompatibilität */
+    --text-main: var(--text);
+    --card-bg: var(--surface);
+
+    /* Glass-Effekte (App-spezifisch) */
     --color-bg-base: #e2e8f0;
     --color-spot-1: rgba(243, 244, 246, 1);
     --color-spot-2: rgba(224, 242, 254, 1);
     --color-spot-3: rgba(241, 245, 249, 1);
     --color-spot-4: rgba(226, 232, 240, 1);
-
-    --card-bg: rgba(255, 255, 255, 0.45);
-    --text-main: #0f172a;
-    --text-muted: #475569;
-    --primary: #2563eb;
-    --border: rgba(0, 0, 0, 0.05);
+    --primary: var(--accent);
     --header-bg: rgba(248, 250, 252, 0.5);
-
     --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.30));
     --glass-border: 1px solid rgba(255, 255, 255, 0.60);
     --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 12px 32px rgba(31, 41, 55, 0.08);
@@ -23,20 +24,15 @@
 }
 
 [data-theme="dark"] {
-    /* 🌙 Dark Mode / Night Mode Theme Colors (Deep Midnight) */
+    --text-main: var(--text);
+    --card-bg: var(--surface);
     --color-bg-base: #020617;
-    --color-spot-1: rgba(30, 58, 138, 0.45);   /* Tiefes Royal-Blau oben links */
-    --color-spot-2: rgba(88, 28, 135, 0.35);   /* Mystisches Violett oben rechts */
-    --color-spot-3: rgba(3, 7, 18, 0.8);        /* Sattes Weltraum-Schwarz unten rechts */
-    --color-spot-4: rgba(15, 23, 42, 0.9);      /* Dunkles Schiefer-Blau unten links */
-
-    --card-bg: rgba(15, 23, 42, 0.55);
-    --text-main: #f8fafc;
-    --text-muted: #64748b;
+    --color-spot-1: rgba(30, 58, 138, 0.45);
+    --color-spot-2: rgba(88, 28, 135, 0.35);
+    --color-spot-3: rgba(3, 7, 18, 0.8);
+    --color-spot-4: rgba(15, 23, 42, 0.9);
     --primary: #38bdf8;
-    --border: rgba(255, 255, 255, 0.05);
     --header-bg: rgba(2, 6, 23, 0.4);
-
     --glass-bg: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.08), rgba(2, 6, 23, 0.85));
     --glass-border: 1px solid rgba(255, 255, 255, 0.12);
     --glass-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.65);

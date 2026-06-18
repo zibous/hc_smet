@@ -1,5 +1,12 @@
 # Makefile for hc-smet
 
+# --- 1. DYNAMISCHE PARAMETER & VARIABLEN ---
+PROJECT_NAME = $(notdir $(CURDIR))
+FORGEJO_IP   = 10.1.1.19
+FORGEJO_PORT = 3143
+FORGEJO_USER = peter
+FORGEJO_URL  = http://$(FORGEJO_IP):$(FORGEJO_PORT)/$(FORGEJO_USER)/$(PROJECT_NAME).git
+
 .DEFAULT_GOAL := help
 .PHONY: build up down restart rebuild logs logs-tail ps stop start shell health run dev install clean help
 
@@ -104,21 +111,17 @@ test-v3: ## Alle v3 Tests
 graph: ## Klassen und Ablauf diagram
 	PYTHONPATH=. pyreverse -o png -p Smartmeterdata app
 
-git-update: ## Git Forgejo Update durchführen
-	git remote set-url origin http://10.1.1.119:3043/peter/hc_smet.git
-	git add -A
-	git commit -m "Update am $$(date +'%Y-%m-%d %H:%M')" || true
-	git push -u origin main
-
-# 🔧 Komprimiert JS und CSS parallel über Docker – maximal optimiert
-jsbuild:
+jsbuild: ## 🔧 Komprimiert JS und CSS parallel über Docker – maximal optimiert
 	@echo "📦 Starte JS & CSS Bundling via Docker & esbuild..."
+	@cp ../shared/themes/theme.css frontend/static/css/theme.css
 	@docker run --rm -v "$$(pwd)":/app -w /app node:20-alpine sh -c "\
-		npx esbuild frontend/static/js/app.js --bundle --minify --sourcemap --target=es2020 --outfile=frontend/static/js/app.bundle.js && \
-		npx esbuild frontend/static/css/style.css --minify --sourcemap --outfile=frontend/static/css/style.bundle.css"
-	@echo "✅ Fertig! JS und CSS Bundles wurden erfolgreich im static-Ordner erstellt."
+		npx esbuild frontend/static/js/main.js --bundle --minify --sourcemap --target=es2020 --outfile=frontend/static/js/app.bundle.js && \
+		npx esbuild frontend/static/js/live/main.js --bundle --minify --sourcemap --target=es2020 --outfile=frontend/static/js/live/main.bundle.js && \
+		npx esbuild frontend/static/css/style.css --bundle --minify --sourcemap --outfile=frontend/static/css/style.bundle.css && \
+		npx esbuild frontend/static/css/live.css --minify --sourcemap --outfile=frontend/static/css/live.bundle.css"
+	@echo "✅ Fertig!"
 
-jsclean:
+jsclean: ## 🔧 Komprimiert JS und CSS entfernen
 	@echo "🧼 Bereinige produktive Build-Dateien..."
 	@rm -f frontend/static/js/app.bundle.js
 	@rm -f frontend/static/js/app.bundle.js.map
@@ -126,6 +129,45 @@ jsclean:
 	@rm -f frontend/static/css/style.bundle.css.map
 	@echo "✨ Verzeichnis ist wieder sauber."
 
+git-status: ## Zeigt die aktuelle Forgejo Server-Verbindung (Remote URL) an
+	@echo "🔍 Überprüfe Git-Remote-Konfiguration..."
+	@if ! git remote get-url origin >/dev/null 2>&1; then \
+		echo "❌ Fehler: 'origin' ist noch nicht eingerichtet!"; \
+		echo "👉 Bitte führe aus: make git-setup"; \
+		exit 1; \
+	fi
+	@URL=$$(git remote get-url origin); \
+	echo "🍏 Forgejo-Server ist aktiv verbunden!" ; \
+	echo "🔗 Aktuelle URL: $$URL"
+
+git-setup: ## Git-Verbindung zum Forgejo-Server automatisch einrichten oder korrigieren
+	@echo "🛠️ Initialisiere Forgejo Server-Verbindung für '$(PROJECT_NAME)'..."
+	@if ! git remote get-url origin >/dev/null 2>&1; then \
+		git remote add origin $(FORGEJO_URL); \
+		echo "🎉 Server-URL erfolgreich neu angelegt!"; \
+	else \
+		git remote set-url origin $(FORGEJO_URL); \
+		echo "🔄 Bestehende Server-URL erfolgreich korrigiert!"; \
+	fi
+	@echo "🔗 Ziel-Adresse: $(FORGEJO_URL)"
+
+git-update: git-status ## Git Forgejo Update durchführen (Normaler Zwischenstand)
+	git add -A
+	git commit -m "Update am $$(date +'%Y-%m-%d %H:%M')" || true
+	git push -u origin main
+
+git-release: git-status ## Neues Versions-Tag automatisch berechnen, erstellen und zu Forgejo pushen
+	git add -A
+	git commit -m "Release-Vorbereitung am $$(date +'%Y-%m-%d %H:%M')" || true
+	git push origin main
+	@LAST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v2.1.0"); \
+	NEXT_TAG=$$(echo $$LAST_TAG | awk -F. '{print $$1"."$$2"."$$3+1}'); \
+	echo "🍏 Letzte Version war: $$LAST_TAG"; \
+	echo "⚡ Berechnete neue Version: $$NEXT_TAG"; \
+	echo "📦 Erstelle Git-Tag $$NEXT_TAG mit aktuellem Zeitstempel..."; \
+	git tag -a $$NEXT_TAG -m "Automatisches Release $$NEXT_TAG am $$(date +'%Y-%m-%d %H:%M') via Makefile"; \
+	git push origin $$NEXT_TAG; \
+	echo "🎉 Version $$NEXT_TAG erfolgreich an Forgejo übermittelt!"
 
 
 # ---------------------------------------------------------
