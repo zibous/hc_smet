@@ -1,67 +1,51 @@
 // theme-init.js – Inline Theme-Logik (läuft vor DOM-ready)
+// ========================================================
 
-document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-/* Background Color Picker */
-function applyBg(c) {
-  document.documentElement.style.setProperty('--bg', c);
-  document.body.style.setProperty('background', c);
-  var r = parseInt(c.slice(1, 3), 16), g = parseInt(c.slice(3, 5), 16), b = parseInt(c.slice(5, 7), 16);
-  var s1 = '#' + [r, g, b].map(function (v) { return Math.min(255, v + 15).toString(16).padStart(2, '0'); }).join('');
-  var s2 = '#' + [r, g, b].map(function (v) { return Math.min(255, v + 25).toString(16).padStart(2, '0'); }).join('');
-  document.documentElement.style.setProperty('--surface', s1);
-  document.documentElement.style.setProperty('--surface2', s2);
-  localStorage.setItem('smet-bg', c);
-  document.getElementById('bgReset').style.display = '';
-}
-
-function resetBg() {
-  document.documentElement.style.removeProperty('--bg');
-  document.documentElement.style.removeProperty('--surface');
-  document.documentElement.style.removeProperty('--surface2');
-  document.body.style.removeProperty('background');
-  localStorage.removeItem('smet-bg');
-  document.getElementById('bgReset').style.display = 'none';
-}
-
-(function () {
-  var c = localStorage.getItem('smet-bg');
-  if (c) {
-    applyBg(c);
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('bgReset').style.display = '';
-    });
-  }
-})();
-
-const btn = document.getElementById('themeToggle');
-const icon = document.getElementById('themeIcon');
-const text = document.getElementById('themeText');
-
+// 1. THEME-ZUSTAND STEUERN (Läuft sofort inline für flackerfreien Start)
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
-  if (theme === 'dark') {
-    if (icon) icon.textContent = '🌙';    
-  } else {
-    if (icon) icon.textContent = '☀️';    
+
+  // Synchronisation für alle Dashboards im Projekt (health-theme)
+  localStorage.setItem('health-theme', theme);
+
+  // Text im Footer aktualisieren, falls er im DOM bereits existiert
+  const footerBtn = document.getElementById('themeToggleFooter');
+  if (footerBtn) {
+    footerBtn.innerHTML = theme === 'dark' ? '☀️ Helles Design' : '🌙 Dunkles Design';
   }
+
   window.dispatchEvent(new CustomEvent('themeChanged', { detail: theme }));
 }
 
-const savedTheme = localStorage.getItem('theme');
+// Theme beim Start sofort setzen (Prüft 'theme', 'health-theme' oder System-Präferenz)
+const savedTheme = localStorage.getItem('theme') || localStorage.getItem('health-theme');
 const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 if (savedTheme) {
   setTheme(savedTheme);
-} else if (systemPrefersDark) {
-  setTheme('dark');
 } else {
-  setTheme('dark');
+  setTheme(systemPrefersDark ? 'dark' : 'light');
 }
 
-btn.addEventListener('click', () => {
+// 2. EVENT-DELEGATION (Fängt den Klick ab, sobald das Element im Footer existiert)
+document.addEventListener('click', function(event) {
+  if (event.target && event.target.id === 'themeToggleFooter') {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  }
+});
+
+// 3. TEXT-ABGLEICH NACH LADEN (Stellt den korrekten Text im Footer beim ersten Laden ein)
+document.addEventListener('DOMContentLoaded', function() {
   const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  setTheme(newTheme);
+  const footerBtn = document.getElementById('themeToggleFooter');
+  if (footerBtn) {
+    footerBtn.innerHTML = currentTheme === 'dark' ? '☀️ Helles Design' : '🌙 Dunkles Design';
+  }
+
+  // Optional: Aktuelles Jahr im Footer setzen falls benötigt
+  const cy = document.getElementById('currentYear');
+  if (cy) cy.textContent = new Date().getFullYear();
 });

@@ -1,15 +1,4 @@
-import { $, state, tc, gc } from './constants.js';
-
-export function applyBgColor(c) {
-  if (c) {
-    document.documentElement.style.setProperty('--bg', c);
-    localStorage.setItem('dash_bg', c);
-    $('#bgColor').value = c;
-  } else {
-    document.documentElement.style.removeProperty('--bg');
-    localStorage.removeItem('dash_bg');
-  }
-}
+import { state, tc, gc } from './constants.js';
 
 export function applyChartDefaults() {
   if (typeof Chart !== 'undefined') {
@@ -21,11 +10,17 @@ export function applyChartDefaults() {
 export function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('theme', t);
-  $('#thBtn').textContent = t === 'dark' ? '\u2600' : '\u263E';
-  applyChartDefaults();
 
-  const bg = localStorage.getItem('dash_bg');
-  if (bg) applyBgColor(bg);
+  // Synchronisation für alle Dashboards im Projekt
+  localStorage.setItem('health-theme', t);
+
+  // Aktualisiert das Element im Footer
+  const footerBtn = document.getElementById('themeToggleFooter');
+  if (footerBtn) {
+    footerBtn.innerHTML = t === 'dark' ? '☀️ Helles Design' : '🌙 Dunkles Design';
+  }
+
+  applyChartDefaults();
 
   // Trigger Rerender falls Platzhalterfunktionen im Hauptskript definiert sind
   if (state.lastData && window.triggerRender) {
@@ -34,15 +29,15 @@ export function setTheme(t) {
 }
 
 export function initTheme() {
-  // $('#bgColor').oninput = function() { applyBgColor(this.value); };
-  // $('#bgReset').onclick = () => {
-  //   applyBgColor(null);
-  //   $('#bgColor').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  // };
+  // Globaler Klick-Abfänger für den neuen Footer-Link
+  document.addEventListener('click', (event) => {
+    if (event.target && event.target.id === 'themeToggleFooter') {
+      const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setTheme(currentTheme);
+    }
+  });
 
-  const savedBg = localStorage.getItem('dash_bg');
-  if (savedBg) applyBgColor(savedBg);
-
-  $('#thBtn').onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  setTheme(localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
+  // Theme initial setzen (Prüft 'theme', 'health-theme' oder System-Präferenz)
+  const defaultTheme = localStorage.getItem('theme') || localStorage.getItem('health-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  setTheme(defaultTheme);
 }
