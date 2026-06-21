@@ -126,11 +126,9 @@ export function renderChart(data, theme = "light") {
         card.style.position = "relative";
         card.style.padding = "1.5rem";
         card.style.borderRadius = "1.4rem";
-        card.style.background = isDark ? "rgba(30, 41, 59, 0.25)" : "var(--card-bg)";
+        card.style.background = isDark ? "var(--card-bg)" : "var(--card-bg)";
         card.style.border = "1px solid var(--border)";
-        card.style.backdropFilter = "blur(22px)";
-        card.style.webkitBackdropFilter = "blur(22px)";
-        card.style.boxShadow = isDark ? "0 20px 40px rgba(0,0,0,0.5)" : "0 10px 30px rgba(0,0,0,0.15)";
+        card.style.boxShadow = isDark ? "var(--shadow-md)" : "var(--shadow-sm)";
     }
 
     /* --------------------------------------------------
@@ -161,7 +159,6 @@ export function renderChart(data, theme = "light") {
         modeBtn.style.background = "rgba(128,128,128,0.06)";
         modeBtn.style.color = "var(--text-main)";
         modeBtn.style.cursor = "pointer";
-        modeBtn.style.backdropFilter = "blur(10px)";
         modeBtn.style.transition = "all .2s ease";
 
         modeBtn.onclick = () => {

@@ -2,41 +2,31 @@
 @import "./live.css";
 
 /* ----------------------------------------------------
-   SMARTMETERS GLASS UI - APP-SPEZIFISCHE VARIABLEN
+   SMARTMETERS DEFAULT THEME - APP-SPEZIFISCHE VARIABLEN
 ---------------------------------------------------- */
 :root {
     /* Aliase für live.css Kompatibilität */
     --text-main: var(--text);
     --card-bg: var(--surface);
-
-    /* Glass-Effekte (App-spezifisch) */
-    --color-bg-base: #e2e8f0;
-    --color-spot-1: rgba(243, 244, 246, 1);
-    --color-spot-2: rgba(224, 242, 254, 1);
-    --color-spot-3: rgba(241, 245, 249, 1);
-    --color-spot-4: rgba(226, 232, 240, 1);
+    --color-bg-base: #f1f5f9;
     --primary: var(--accent);
-    --header-bg: rgba(248, 250, 252, 0.5);
-    --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.30));
-    --glass-border: 1px solid rgba(255, 255, 255, 0.60);
-    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 12px 32px rgba(31, 41, 55, 0.08);
-    --glass-text: #0f172a;
+    --header-bg: var(--bg2);
+    --glass-bg: var(--card-bg);
+    --glass-border: 1px solid var(--border);
+    --glass-shadow: var(--shadow-sm);
+    --glass-text: var(--text);
 }
 
 [data-theme="dark"] {
     --text-main: var(--text);
     --card-bg: var(--surface);
-    --color-bg-base: #020617;
-    --color-spot-1: rgba(30, 58, 138, 0.45);
-    --color-spot-2: rgba(88, 28, 135, 0.35);
-    --color-spot-3: rgba(3, 7, 18, 0.8);
-    --color-spot-4: rgba(15, 23, 42, 0.9);
+    --color-bg-base: #0f1117;
     --primary: #38bdf8;
-    --header-bg: rgba(2, 6, 23, 0.4);
-    --glass-bg: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.08), rgba(2, 6, 23, 0.85));
-    --glass-border: 1px solid rgba(255, 255, 255, 0.12);
-    --glass-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.65);
-    --glass-text: #f8fafc;
+    --header-bg: var(--bg2);
+    --glass-bg: var(--card-bg);
+    --glass-border: 1px solid var(--border);
+    --glass-shadow: var(--shadow-sm);
+    --glass-text: var(--text);
 }
 
 * {
@@ -48,7 +38,7 @@ html {
 }
 
 /* ----------------------------------------------------
-   🚀 DEIN VERBESSERTER BODY BLOCK (100% Deine System-Logik)
+   🚀 BODY BLOCK
 ---------------------------------------------------- */
 body {
     margin: 0;
@@ -57,20 +47,8 @@ body {
     font-size: 1.6rem;
     color: var(--text-main);
     -webkit-font-smoothing: antialiased;
-
-    /* Sanfte Farbübergänge beim Schalten gewahrt */
     transition: background-color 0.2s ease, color 0.2s ease;
-
-    /* ✨ DER FIX: Wir mappen die vier Ecken-Lichter direkt als Layer-Kette auf den Hintergrund */
-    background-color: var(--color-bg-base);
-    /* background-image:
-        radial-gradient(at 0% 0%, var(--color-spot-1) 0px, transparent 55%),
-        radial-gradient(at 100% 0%, var(--color-spot-2) 0px, transparent 55%),
-        radial-gradient(at 100% 100%, var(--color-spot-3) 0px, transparent 55%),
-        radial-gradient(at 0% 100%, var(--color-spot-4) 0px, transparent 55%);
-
-    background-attachment: fixed;
-    background-size: 100% 100%; */
+    background-color: var(--bg);
 }
 
 
@@ -80,17 +58,20 @@ body {
 .header-layout-wrap {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
 }
 
 .header {
-    padding: 2rem;
-    /* 🔧 FIX: Nutzt dynamischen Header-Hintergrund und Rahmen */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
     background: var(--header-bg);
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
@@ -110,7 +91,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 2rem;
-    margin-top: 1.6rem;
+    margin-bottom: 2rem;
 }
 
 /* =================================================================
@@ -156,7 +137,7 @@ body {
 
 .container {
     padding: 3rem;
-    flex: 1; /* Drückt den Footer immer an den unteren Bildschirmrand */
+    flex: 1;
 }
 
 .cards {
@@ -176,22 +157,18 @@ body {
   gap: .8rem;
 }
 
-/* Shared Glass Style - Nutzt jetzt die angepassten Glass-Variablen */
 .period-btn,
 .period-dropdown,
 .range-box,
 .actions button {
-  background: var(--glass-bg);
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .period-btn {
   padding: .55rem 1rem;
   border-radius: 999px;
-  /* 🔧 FIX: Nutzt dynamischen Glass-Text */
   color: var(--glass-text);
   cursor: pointer;
   font-size: .92rem;
@@ -222,6 +199,9 @@ body {
   border-radius: .95rem;
   z-index: 999999;
   animation: dropdownIn .16s ease-out;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 .period-dropdown.hidden {
@@ -243,7 +223,6 @@ body {
   padding: .65rem .9rem;
   border-radius: .7rem;
   font-size: .92rem;
-  /* 🔧 FIX: Nutzt dynamischen Glass-Text */
   color: var(--glass-text);
   cursor: pointer;
   transition: .14s ease;
@@ -271,14 +250,12 @@ body {
     color: var(--text-muted);
     background: var(--card-bg);
     border-top: 1px solid var(--border);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
 }
 .footer-wrap {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1400px; /* Passt sich deinem Dashboard-Layout an */
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -287,4 +264,15 @@ body {
     flex-direction: column;
     gap: 0.6rem;
   }
+}
+
+
+.ds-custom input[type="date"]::-webkit-calendar-picker-indicator { 
+    filter: invert(var(--is-dark, 1));
+    cursor: pointer; 
+}
+
+[data-theme="dark"]  .ds-custom input[type="date"]::-webkit-calendar-picker-indicator { 
+    filter: invert(1); 
+    cursor: pointer; 
 }

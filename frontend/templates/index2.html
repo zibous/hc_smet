@@ -23,13 +23,13 @@
       <div style="display:flex; align-items:center; gap:8px;">
         <a href="./" class="nav-link">📊 Dashboard</a>
         <button class="theme-toggle-btn" id="themeToggle" aria-label="Theme umschalten">
-          <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
-        </button>
-        <button class="theme-toggle-btn" onclick="document.getElementById('bgPick').click()" title="Hintergrundfarbe">🎨</button>
-        <input type="color" id="bgPick" style="display:none" oninput="applyBg(this.value)" onchange="applyBg(this.value)">
-        <button class="theme-toggle-btn" id="bgReset" onclick="resetBg()" style="display:none;font-size:.7rem" title="Farbe zurücksetzen">✕</button>
+          <span id="themeIcon">☀️</span>
+        </button>        
       </div>
     </div>
+  </header>
+
+  <main class="container">
 
     <div class="top-bar">
       <nav class="tab-nav" id="tabNav">
@@ -38,9 +38,6 @@
         <button class="tab-btn" data-tab="analytics">🔬 Analytics</button>
       </nav>
     </div>
-  </header>
-
-  <main class="container">
 
     <!-- Tab: Live Sensoren -->
     <section id="tab-sensors" class="tab-content active">
@@ -93,11 +90,9 @@
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
       if (theme === 'dark') {
-        if (icon) icon.textContent = '🌙';
-        if (text) text.textContent = 'Night Mode';
+        if (icon) icon.textContent = '🌙';        
       } else {
-        if (icon) icon.textContent = '☀️';
-        if (text) text.textContent = 'Light Mode';
+        if (icon) icon.textContent = '☀️';        
       }
     }
 

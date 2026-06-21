@@ -1,4 +1,4 @@
-(()=>{var J=!1;function W(e){if(!J){let o=document.createElement("style");o.innerHTML=`
+(()=>{var W=!1;function V(e){if(!W){let a=document.createElement("style");a.innerHTML=`
             #summary {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
@@ -11,14 +11,10 @@
                 border-radius: 1.0rem;
                 transition: .25s ease;
 
-                // \u2600\uFE0F\u{1F319} NATIVE THEME VARIABLES (Ersetzt harte Farben)
                 color: var(--text-main, #ffffff);
                 background: var(--card-bg, rgba(255,255,255,0.08));
                 border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-                backdrop-filter: blur(18px);
-                -webkit-backdrop-filter: blur(18px);
-                box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+                box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
             }
 
             .kpi:hover {
@@ -57,11 +53,11 @@
 
             .kpi.delta .kpi-value { color: #7c3aed; }
             [data-theme="dark"] .kpi.delta .kpi-value { color: #a78bfa; }
-        `,document.head.appendChild(o),J=!0}let a=e&&e.total!==void 0?e.total:0,t=e&&e.avg!==void 0?e.avg:0,l=e&&e.peak!==void 0?e.peak:0,s=e&&e.cost!==void 0?e.cost:0,n=e&&e.delta!==void 0?e.delta:0;document.getElementById("summary").innerHTML=`
+        `,document.head.appendChild(a),W=!0}let o=e&&e.total!==void 0?e.total:0,t=e&&e.avg!==void 0?e.avg:0,l=e&&e.peak!==void 0?e.peak:0,s=e&&e.cost!==void 0?e.cost:0,n=e&&e.delta!==void 0?e.delta:0;document.getElementById("summary").innerHTML=`
 
         <div class="kpi total">
             <div class="kpi-label">Verbrauch</div>
-            <div class="kpi-value">${a.toFixed(1)} kWh</div>
+            <div class="kpi-value">${o.toFixed(1)} kWh</div>
         </div>
 
         <div class="kpi avg">
@@ -84,7 +80,7 @@
             <div class="kpi-value">${n>=0?"+":""}${n.toFixed(1)} %</div>
         </div>
 
-    `}var F=null;function Z(e){F=e}var D=localStorage.getItem("dash_node")||"HOME",G=localStorage.getItem("dash_breadcrumb"),y=G?JSON.parse(G):["Haus"],Y=localStorage.getItem("dash_nodes"),B=Y?JSON.parse(Y):["HOME"],q=localStorage.getItem("dash_range"),ie=q?JSON.parse(q):null,se=localStorage.getItem("dash_compare")!=="false";function P(e){D=e,localStorage.setItem("dash_node",e)}function K(e,a){y.push(e),B.push(a),localStorage.setItem("dash_breadcrumb",JSON.stringify(y)),localStorage.setItem("dash_nodes",JSON.stringify(B))}function U(e){y=y.slice(0,e+1),B=B.slice(0,e+1),D=B[e],P(D),localStorage.setItem("dash_breadcrumb",JSON.stringify(y)),localStorage.setItem("dash_nodes",JSON.stringify(B))}function N(e,a){ie=e,localStorage.setItem("dash_range",JSON.stringify(e)),a&&localStorage.setItem("dash_btn_label",a)}function R(e){se=e,localStorage.setItem("dash_compare",e)}function X(){return!y||y.length===0?"Haus":y[y.length-1]}var Q=!1;function de(){if(Q)return;let e=document.createElement("style");e.innerHTML=`
+    `}var M=null;function Z(e){M=e}var B=localStorage.getItem("dash_node")||"HOME",G=localStorage.getItem("dash_breadcrumb"),y=G?JSON.parse(G):["Haus"],Y=localStorage.getItem("dash_nodes"),E=Y?JSON.parse(Y):["HOME"],q=localStorage.getItem("dash_range"),ie=q?JSON.parse(q):null,se=localStorage.getItem("dash_compare")!=="false";function H(e){B=e,localStorage.setItem("dash_node",e)}function K(e,o){y.push(e),E.push(o),localStorage.setItem("dash_breadcrumb",JSON.stringify(y)),localStorage.setItem("dash_nodes",JSON.stringify(E))}function X(e){y=y.slice(0,e+1),E=E.slice(0,e+1),B=E[e],H(B),localStorage.setItem("dash_breadcrumb",JSON.stringify(y)),localStorage.setItem("dash_nodes",JSON.stringify(E))}function O(e,o){ie=e,localStorage.setItem("dash_range",JSON.stringify(e)),o&&localStorage.setItem("dash_btn_label",o)}function R(e){se=e,localStorage.setItem("dash_compare",e)}function U(){return!y||y.length===0?"Haus":y[y.length-1]}var Q=!1;function de(){if(Q)return;let e=document.createElement("style");e.innerHTML=`
         .breadcrumb {
             display: flex;
             align-items: center;
@@ -103,14 +99,10 @@
             font-size: 1.6rem;
             font-weight: 500;
 
-            // \u2600\uFE0F\u{1F319} NATIVE THEME VARIABLES (Ersetzt harte Farben)
             color: var(--text-main, rgba(255,255,255,0.92));
             background: var(--card-bg, rgba(255,255,255,0.08));
             border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
             transition: .25s ease;
         }
 
@@ -150,10 +142,10 @@
                 font-size: 1.25rem;
             }
         }
-    `,document.head.appendChild(e),Q=!0}function ee(e,a){P(e),K(a,e),L(),M()}function le(e){U(e),L(),M()}function L(){de();let e=document.getElementById("breadcrumb");e&&(e.className="breadcrumb",e.innerHTML="",y.forEach((a,t)=>{let l=document.createElement("div");l.className=t===y.length-1?"crumb active":"crumb";let s=t===0?'<span class="crumb-icon">\u{1F3E0}</span>':"";if(l.innerHTML=`
+    `,document.head.appendChild(e),Q=!0}function ee(e,o){H(e),K(o,e),$(),L()}function le(e){X(e),$(),L()}function $(){de();let e=document.getElementById("breadcrumb");e&&(e.className="breadcrumb",e.innerHTML="",y.forEach((o,t)=>{let l=document.createElement("div");l.className=t===y.length-1?"crumb active":"crumb";let s=t===0?'<span class="crumb-icon">\u{1F3E0}</span>':"";if(l.innerHTML=`
             ${s}
             <span>
-                ${a}
+                ${o}
             </span>
         `,l.addEventListener("click",()=>{le(t)}),e.appendChild(l),t<y.length-1){let n=document.createElement("div");n.className="crumb-divider",n.innerHTML="\u2192",e.appendChild(n)}}))}var te=!1;function ce(){if(te)return;let e=document.createElement("style");e.innerHTML=`
         .cards {
@@ -169,17 +161,10 @@
             border-radius: 1.8rem;
             cursor: pointer;
 
-            // \u2600\uFE0F\u{1F319} NATIVE THEME VARIABLES (Ersetzt harte Farben)
             color: var(--text-main, #ffffff);
             background: var(--card-bg, rgba(255,255,255,0.10));
             border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-
-            box-shadow:
-                0 8px 24px rgba(0,0,0,0.12),
-                inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
 
             transition:
                 transform .25s ease,
@@ -271,7 +256,6 @@
             padding: 0.35rem 0.7rem;
             border-radius: 999px;
             background: rgba(128,128,128,0.08);
-            backdrop-filter: blur(10px);
         }
 
         .sparkline-wrapper {
@@ -311,17 +295,17 @@
             font-weight: 700;
             color: var(--text-main, #ffffff);
         }
-    `,document.head.appendChild(e),te=!0}function pe(e,a){if(!a||a.length<2)return;let t=e.getContext("2d"),l=e.offsetWidth,s=e.offsetHeight,n=window.devicePixelRatio||1;e.width=l*n,e.height=s*n,t.scale(n,n),t.clearRect(0,0,l,s);let o=Math.floor(l/3),d=a;if(a.length>o){d=[];let x=a.length/o;for(let m=0;m<o;m++){let b=Math.floor(m*x),f=Math.floor((m+1)*x),v=0,c=0;for(let r=b;r<f;r++)v+=a[r],c++;d.push(v/c)}}let i=Math.min(...d),g=Math.max(...d)-i||1,h=d.map(x=>(x-i)/g),u=l/(h.length-1),E=document.documentElement.getAttribute("data-theme")==="dark",k=E?"hsla(28, 100%, 58%, 1)":"#2b6cb0",z=E?"hsla(28, 100%, 60%, 1)":"#4299e1",S=E?"rgba(255, 119, 0, 0.28)":"rgba(66, 153, 225, 0.25)",I=t.createLinearGradient(0,0,0,s);I.addColorStop(0,S),I.addColorStop(1,"rgba(0, 0, 0, 0)"),t.beginPath(),h.forEach((x,m)=>{let b=m*u,f=s-x*(s-10)-5;m===0?t.moveTo(b,f):t.lineTo(b,f)}),t.lineTo(l,s),t.lineTo(0,s),t.closePath(),t.fillStyle=I,t.fill(),t.beginPath(),h.forEach((x,m)=>{let b=m*u,f=s-x*(s-10)-5;m===0?t.moveTo(b,f):t.lineTo(b,f)}),t.lineWidth=1.6,t.strokeStyle=k,t.shadowColor=z,t.shadowBlur=E?10:2,t.lineJoin="round",t.lineCap="round",t.stroke(),t.shadowBlur=0}function re(e){ce();let a=document.getElementById("cards");if(!a)return;a.innerHTML="";let t=e.stats||{},l=e.series||{},s=e.items||[],n=document.documentElement.getAttribute("data-theme")==="dark";s.forEach(o=>{let d=o.level==4,i=t[o.id]||{current:0,delta:0,min:0,max:0,avg:0},w=Array.isArray(l[o.id])?l[o.id]:[],g=document.createElement("div");d?g.className="card no-click":g.className="card",n&&(g.style.background="rgba(30, 41, 59, 0.22)"),g.setAttribute("data-active",i.current>0?"true":"false");let h=i.delta>=0;g.innerHTML=`
+    `,document.head.appendChild(e),te=!0}function me(e,o){if(!o||o.length<2)return;let t=e.getContext("2d"),l=e.offsetWidth,s=e.offsetHeight,n=window.devicePixelRatio||1;e.width=l*n,e.height=s*n,t.scale(n,n),t.clearRect(0,0,l,s);let a=Math.floor(l/3),d=o;if(o.length>a){d=[];let x=o.length/a;for(let p=0;p<a;p++){let g=Math.floor(p*x),b=Math.floor((p+1)*x),v=0,c=0;for(let r=g;r<b;r++)v+=o[r],c++;d.push(v/c)}}let i=Math.min(...d),f=Math.max(...d)-i||1,h=d.map(x=>(x-i)/f),u=l/(h.length-1),T=document.documentElement.getAttribute("data-theme")==="dark",k=T?"hsla(28, 100%, 58%, 1)":"#2b6cb0",z=T?"hsla(28, 100%, 60%, 1)":"#4299e1",S=T?"rgba(255, 119, 0, 0.28)":"rgba(66, 153, 225, 0.25)",I=t.createLinearGradient(0,0,0,s);I.addColorStop(0,S),I.addColorStop(1,"rgba(0, 0, 0, 0)"),t.beginPath(),h.forEach((x,p)=>{let g=p*u,b=s-x*(s-10)-5;p===0?t.moveTo(g,b):t.lineTo(g,b)}),t.lineTo(l,s),t.lineTo(0,s),t.closePath(),t.fillStyle=I,t.fill(),t.beginPath(),h.forEach((x,p)=>{let g=p*u,b=s-x*(s-10)-5;p===0?t.moveTo(g,b):t.lineTo(g,b)}),t.lineWidth=1.6,t.strokeStyle=k,t.shadowColor=z,t.shadowBlur=T?10:2,t.lineJoin="round",t.lineCap="round",t.stroke(),t.shadowBlur=0}function re(e){ce();let o=document.getElementById("cards");if(!o)return;o.innerHTML="";let t=e.stats||{},l=e.series||{},s=e.items||[],n=document.documentElement.getAttribute("data-theme")==="dark";s.forEach(a=>{let d=a.level==4,i=t[a.id]||{current:0,delta:0,min:0,max:0,avg:0},w=Array.isArray(l[a.id])?l[a.id]:[],f=document.createElement("div");d?f.className="card no-click":f.className="card",n&&(f.style.background="rgba(30, 41, 59, 0.22)"),f.setAttribute("data-active",i.current>0?"true":"false");let h=i.delta>=0;f.innerHTML=`
             <div class="card-header">
                 <div>
-                    <div class="card-title">${o.name}</div>
+                    <div class="card-title">${a.name}</div>
                     <div class="card-value">
-                        ${(o.value??0).toFixed(1)}
+                        ${(a.value??0).toFixed(1)}
                         <span class="card-unit">kWh</span>
                     </div>
                 </div>
                 <div class="card-delta" style="color: ${h?"#00FFC2":"#FF7A7A"};">
-                    ${h?"+":""}${(o.delta??0).toFixed(1)}%
+                    ${h?"+":""}${(a.delta??0).toFixed(1)}%
                 </div>
             </div>
 
@@ -343,9 +327,10 @@
                     <div class="stat-value">${(i.avg??0).toFixed(1)}</div>
                 </div>
             </div>
-        `,d||g.addEventListener("click",()=>{ee(o.id,o.name)}),a.appendChild(g);let u=g.querySelector(".sparkline");u&&w.length>0&&pe(u,w)})}var C="area";function me(e,a){let t=a==="dark",l=t?"#ffffff":"#1e293b",s=t?"#f1f5f9":"#475569",n=t?"rgba(255, 255, 255, 0.05)":"rgba(0,0,0,0.04)",o=t?"rgba(15, 23, 42, 0.98)":"rgba(255,255,255,0.96)",d=t?"rgba(56, 189, 248, 0.4)":"rgba(0,0,0,0.08)",i=t?"#ffffff":"#1e293b",w=t?"#f8fafc":"#475569",g=C==="bar";return{responsive:!0,maintainAspectRatio:!1,animation:!1,interaction:{intersect:!1,mode:"index"},layout:{padding:{left:30,right:20,top:0,bottom:10}},plugins:{legend:{display:!1},title:{display:!0,text:e,align:"start",color:l,FullSize:!1,font:{size:18,weight:"600"},padding:{top:10,bottom:10}},tooltip:{backgroundColor:o,borderColor:d,borderWidth:1.5,titleColor:i,bodyColor:w,padding:12,displayColors:C!=="area",boxBorderRadius:6}},scales:{x:{stacked:g,ticks:{color:s,autoSkip:!0,maxTicksLimit:6,font:{size:11,weight:"500"}},grid:{display:!1}},y:{stacked:g,beginAtZero:!0,ticks:{color:s,font:{size:11,weight:"500"}},grid:{color:n,drawBorder:!1}}}}}function A(e,a="light"){let t=document.getElementById("energyChart");if(!e?.current)return;let l=t.getContext("2d"),s="Verbrauch f\xFCr "+X(),n=localStorage.getItem("theme")||a,o=n==="dark",d=document.getElementById("dashboardCard");d&&(d.style.position="relative",d.style.padding="1.5rem",d.style.borderRadius="1.4rem",d.style.background=o?"rgba(30, 41, 59, 0.25)":"var(--card-bg)",d.style.border="1px solid var(--border)",d.style.backdropFilter="blur(22px)",d.style.webkitBackdropFilter="blur(22px)",d.style.boxShadow=o?"0 20px 40px rgba(0,0,0,0.5)":"0 10px 30px rgba(0,0,0,0.15)");let i=document.getElementById("chartModeBtn"),w={bar:"\u{1F4CA}",line:"\u{1F4C8}",area:"\u{1F308}"};!i&&d?(i=document.createElement("button"),i.id="chartModeBtn",i.textContent=w[C],i.style.position="absolute",i.style.top="1.2rem",i.style.left="12px",i.style.width="42px",i.style.height="42px",i.style.display="flex",i.style.alignItems="center",i.style.justifyContent="center",i.style.fontSize="1.3rem",i.style.padding="0",i.style.borderRadius="999px",i.style.border="1px solid var(--border)",i.style.background="rgba(128,128,128,0.06)",i.style.color="var(--text-main)",i.style.cursor="pointer",i.style.backdropFilter="blur(10px)",i.style.transition="all .2s ease",i.onclick=()=>{C=C==="bar"?"line":C==="line"?"area":"bar",i.textContent=w[C],A(e,n)},d.appendChild(i)):i&&(i.textContent=w[C],i.style.color="var(--text-main)",i.style.borderColor="var(--border)"),t.style.width="100%",t.style.height="380px";let g=e.current.time||[],h=e.current.series||{},u=Object.keys(h),E=e.current.labels||{},k=e.compare?.series||e.previous?.series||null;function z(m){let b=m.chart,{ctx:f,chartArea:v}=b;if(!v)return"rgba(16, 185, 129, 0.15)";let c=f.createLinearGradient(0,v.top,0,v.bottom);return o?(c.addColorStop(0,"rgba(244, 63, 94, 0.35)"),c.addColorStop(.5,"rgba(245, 158, 11, 0.15)"),c.addColorStop(1,"rgba(16, 185, 129, 0.00)")):(c.addColorStop(0,"rgba(255, 90, 90, 0.22)"),c.addColorStop(.5,"rgba(255, 210, 0, 0.08)"),c.addColorStop(1,"rgba(0, 255, 140, 0.01)")),c}let S=[],I=[];if(C==="area"){let m=[],b=[];if(u.length>0){m=[...h[u[0]]||[]];for(let c=1;c<u.length;c++){let r=h[u[c]]||[];for(let p=0;p<m.length;p++)m[p]+=r[p]||0}}if(k&&u.length>0){b=[...k[u[0]]||[]];for(let c=1;c<u.length;c++){let r=k[u[c]]||[];for(let p=0;p<b.length;p++)b[p]+=r[p]||0}}let f=o?"hsla(142, 70%, 50%, ":"hsla(140, 90%, 45%, ",v=o?"hsla(0, 0%, 100%, ":"hsla(0, 0%, 40%, ";S.push({label:"Gesamtverbrauch (Aktuell)",data:m,type:"line",backgroundColor:z,borderColor:f+"1)",borderWidth:2.5,fill:"origin",tension:.22,pointRadius:0,pointHoverRadius:4,order:1}),k&&b.length>0&&S.push({label:"Gesamtverbrauch (Vorperiode)",data:b,type:"line",backgroundColor:"transparent",borderColor:v+(o?"0.45)":"0.55)"),borderWidth:1.5,borderDash:[5,5],fill:!1,tension:.22,pointRadius:0,pointHoverRadius:3,order:2})}else u.forEach((m,b)=>{let f=E[m]||m,v=b*(360/Math.max(1,u.length))%360,c=o?`hsla(${v}, 100%, 65%, `:`hsla(${v}, 90%, 55%, `,r=C==="bar",p=o?r?`hsla(${v}, 90%, 55%, `:"hsla(0, 0%, 100%, ":`hsla(${v}, 20%, 45%, `,T=o?"0.45)":"0.55)",ne=r?p+"0.45)":p+T;I.push({name:f,color:c+"1)",compColor:ne}),S.push({label:f,data:h[m]||[],type:r?"bar":"line",backgroundColor:r?c+"0.95)":c+"0.05)",borderColor:c+"1)",borderWidth:r?1:2,borderRadius:r?6:0,borderSkipped:r?"middle":!1,fill:!1,tension:r?0:.22,pointRadius:0,pointHoverRadius:r?0:4,stack:"current",barPercentage:.8,categoryPercentage:.7,order:1}),k&&k[m]&&S.push({label:`${f} (Vorperiode)`,data:k[m]||[],type:r?"bar":"line",backgroundColor:r?p+"0.45)":"transparent",borderColor:r?o?"rgba(15,23,42,0.5)":"rgba(255,255,255,0.5)":p+T,borderWidth:r?1:1.25,borderRadius:r?6:0,borderSkipped:r?"middle":!1,borderDash:[5,5],fill:!1,tension:r?0:.22,pointRadius:0,pointHoverRadius:r?0:3,stack:"compare",barPercentage:.8,categoryPercentage:.7,order:2})});F&&F.destroy();let x=new Chart(l,{type:C==="bar"?"bar":"line",data:{labels:g,datasets:S},options:me(s,n)});Z(x)}var ae=!1;function ue(){if(ae)return;let e=document.createElement("style");e.innerHTML=`
+        `,d||f.addEventListener("click",()=>{ee(a.id,a.name)}),o.appendChild(f);let u=f.querySelector(".sparkline");u&&w.length>0&&me(u,w)})}var C="area";function pe(e,o){let t=o==="dark",l=t?"#ffffff":"#1e293b",s=t?"#f1f5f9":"#475569",n=t?"rgba(255, 255, 255, 0.05)":"rgba(0,0,0,0.04)",a=t?"rgba(15, 23, 42, 0.98)":"rgba(255,255,255,0.96)",d=t?"rgba(56, 189, 248, 0.4)":"rgba(0,0,0,0.08)",i=t?"#ffffff":"#1e293b",w=t?"#f8fafc":"#475569",f=C==="bar";return{responsive:!0,maintainAspectRatio:!1,animation:!1,interaction:{intersect:!1,mode:"index"},layout:{padding:{left:30,right:20,top:0,bottom:10}},plugins:{legend:{display:!1},title:{display:!0,text:e,align:"start",color:l,FullSize:!1,font:{size:18,weight:"600"},padding:{top:10,bottom:10}},tooltip:{backgroundColor:a,borderColor:d,borderWidth:1.5,titleColor:i,bodyColor:w,padding:12,displayColors:C!=="area",boxBorderRadius:6}},scales:{x:{stacked:f,ticks:{color:s,autoSkip:!0,maxTicksLimit:6,font:{size:11,weight:"500"}},grid:{display:!1}},y:{stacked:f,beginAtZero:!0,ticks:{color:s,font:{size:11,weight:"500"}},grid:{color:n,drawBorder:!1}}}}}function _(e,o="light"){let t=document.getElementById("energyChart");if(!e?.current)return;let l=t.getContext("2d"),s="Verbrauch f\xFCr "+U(),n=localStorage.getItem("theme")||o,a=n==="dark",d=document.getElementById("dashboardCard");d&&(d.style.position="relative",d.style.padding="1.5rem",d.style.borderRadius="1.4rem",d.style.background="var(--card-bg)",d.style.border="1px solid var(--border)",d.style.boxShadow=a?"var(--shadow-md)":"var(--shadow-sm)");let i=document.getElementById("chartModeBtn"),w={bar:"\u{1F4CA}",line:"\u{1F4C8}",area:"\u{1F308}"};!i&&d?(i=document.createElement("button"),i.id="chartModeBtn",i.textContent=w[C],i.style.position="absolute",i.style.top="1.2rem",i.style.left="12px",i.style.width="42px",i.style.height="42px",i.style.display="flex",i.style.alignItems="center",i.style.justifyContent="center",i.style.fontSize="1.3rem",i.style.padding="0",i.style.borderRadius="999px",i.style.border="1px solid var(--border)",i.style.background="rgba(128,128,128,0.06)",i.style.color="var(--text-main)",i.style.cursor="pointer",i.style.transition="all .2s ease",i.onclick=()=>{C=C==="bar"?"line":C==="line"?"area":"bar",i.textContent=w[C],_(e,n)},d.appendChild(i)):i&&(i.textContent=w[C],i.style.color="var(--text-main)",i.style.borderColor="var(--border)"),t.style.width="100%",t.style.height="380px";let f=e.current.time||[],h=e.current.series||{},u=Object.keys(h),T=e.current.labels||{},k=e.compare?.series||e.previous?.series||null;function z(p){let g=p.chart,{ctx:b,chartArea:v}=g;if(!v)return"rgba(16, 185, 129, 0.15)";let c=b.createLinearGradient(0,v.top,0,v.bottom);return a?(c.addColorStop(0,"rgba(244, 63, 94, 0.35)"),c.addColorStop(.5,"rgba(245, 158, 11, 0.15)"),c.addColorStop(1,"rgba(16, 185, 129, 0.00)")):(c.addColorStop(0,"rgba(255, 90, 90, 0.22)"),c.addColorStop(.5,"rgba(255, 210, 0, 0.08)"),c.addColorStop(1,"rgba(0, 255, 140, 0.01)")),c}let S=[],I=[];if(C==="area"){let p=[],g=[];if(u.length>0){p=[...h[u[0]]||[]];for(let c=1;c<u.length;c++){let r=h[u[c]]||[];for(let m=0;m<p.length;m++)p[m]+=r[m]||0}}if(k&&u.length>0){g=[...k[u[0]]||[]];for(let c=1;c<u.length;c++){let r=k[u[c]]||[];for(let m=0;m<g.length;m++)g[m]+=r[m]||0}}let b=a?"hsla(142, 70%, 50%, ":"hsla(140, 90%, 45%, ",v=a?"hsla(0, 0%, 100%, ":"hsla(0, 0%, 40%, ";S.push({label:"Gesamtverbrauch (Aktuell)",data:p,type:"line",backgroundColor:z,borderColor:b+"1)",borderWidth:2.5,fill:"origin",tension:.22,pointRadius:0,pointHoverRadius:4,order:1}),k&&g.length>0&&S.push({label:"Gesamtverbrauch (Vorperiode)",data:g,type:"line",backgroundColor:"transparent",borderColor:v+(a?"0.45)":"0.55)"),borderWidth:1.5,borderDash:[5,5],fill:!1,tension:.22,pointRadius:0,pointHoverRadius:3,order:2})}else u.forEach((p,g)=>{let b=T[p]||p,v=g*(360/Math.max(1,u.length))%360,c=a?`hsla(${v}, 100%, 65%, `:`hsla(${v}, 90%, 55%, `,r=C==="bar",m=a?r?`hsla(${v}, 90%, 55%, `:"hsla(0, 0%, 100%, ":`hsla(${v}, 20%, 45%, `,D=a?"0.45)":"0.55)",ne=r?m+"0.45)":m+D;I.push({name:b,color:c+"1)",compColor:ne}),S.push({label:b,data:h[p]||[],type:r?"bar":"line",backgroundColor:r?c+"0.95)":c+"0.05)",borderColor:c+"1)",borderWidth:r?1:2,borderRadius:r?6:0,borderSkipped:r?"middle":!1,fill:!1,tension:r?0:.22,pointRadius:0,pointHoverRadius:r?0:4,stack:"current",barPercentage:.8,categoryPercentage:.7,order:1}),k&&k[p]&&S.push({label:`${b} (Vorperiode)`,data:k[p]||[],type:r?"bar":"line",backgroundColor:r?m+"0.45)":"transparent",borderColor:r?a?"rgba(15,23,42,0.5)":"rgba(255,255,255,0.5)":m+D,borderWidth:r?1:1.25,borderRadius:r?6:0,borderSkipped:r?"middle":!1,borderDash:[5,5],fill:!1,tension:r?0:.22,pointRadius:0,pointHoverRadius:r?0:3,stack:"compare",barPercentage:.8,categoryPercentage:.7,order:2})});M&&M.destroy();let x=new Chart(l,{type:C==="bar"?"bar":"line",data:{labels:f,datasets:S},options:pe(s,n)});Z(x)}var oe=!1;function ue(){if(oe)return;let e=document.createElement("style");e.innerHTML=`
     .header {
-      position: relative !important;
+      position: sticky !important;
+      top: 0 !important;
       z-index: 1000 !important;
     }
 
@@ -364,8 +349,6 @@
       cursor: pointer;
       font-size: 1.35rem;
       font-weight: 500;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
     }
 
     .period-btn::after {
@@ -373,7 +356,7 @@
       opacity: 0.7;
     }
 
-    /* \u2728 NEU: Mattiertes, blickdichtes VisionOS-Glas f\xFCr das Dropdown gegen Durchscheinen */
+    /* \u2728 Dropdown Styles */
     .period-dropdown {
       position: absolute !important;
       top: calc(100% + 0.5rem);
@@ -384,21 +367,16 @@
       z-index: 99999 !important;
       max-height: 450px;
       overflow-y: auto;
+      box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.2));
 
-      /* Starke Unsch\xE4rfe und massiver Schatten f\xFCr r\xE4umliche Abhebung */
-      backdrop-filter: blur(35px) saturate(160%);
-      -webkit-backdrop-filter: blur(35px) saturate(160%);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-
-      /* Theme-Weiche: Sattes Dunkelblau nachts, deckendes Milchwei\xDF tags\xFCber */
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: var(--bg2, #ffffff);
+      border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
     }
 
     [data-theme="dark"] .period-dropdown {
-      background: rgba(13, 20, 38, 0.94);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+      background: var(--bg2, rgba(13, 20, 38, 0.94));
+      border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+      box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.4));
     }
 
     .period-dropdown.hidden {
@@ -521,7 +499,7 @@
     .slider::before { content: ""; position: absolute; top: 0.2rem; left: 0.2rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #ffffff; transition: .2s ease; }
     .toggle input:checked + .slider { background: var(--primary, #3182ce); }
     .toggle input:checked + .slider::before { transform: translateX(1.6rem); }
-  `,document.head.appendChild(e),ae=!0}function $(e){let a=new Date,t=new Date,l=new Date;if(t.setHours(0,0,0,0),l.setHours(23,59,59,999),e&&e.startsWith("jahr_")){let n=parseInt(e.split("_")[1]);t.setFullYear(n,0,1),l.setFullYear(n,11,31)}else switch(e){case"heute":break;case"gestern":t.setDate(a.getDate()-1),l.setDate(a.getDate()-1);break;case"woche":{let n=a.getDay(),o=a.getDate()-n+(n===0?-6:1);t.setDate(o);break}case"7tage":t.setDate(a.getDate()-6);break;case"30tage":t.setDate(a.getDate()-29);break;case"monat":t.setDate(1);break;case"jahr":t.setMonth(0,1);break}let s=n=>{let o=d=>String(d).padStart(2,"0");return`${n.getFullYear()}-${o(n.getMonth()+1)}-${o(n.getDate())}T${o(n.getHours())}:${o(n.getMinutes())}:${o(n.getSeconds())}`};return{from:s(t),to:s(l)}}function oe(e){ue();let a=document.querySelector(".controls");if(!a)return;let t=localStorage.getItem("dash_range"),l=t?JSON.parse(t):null,s=localStorage.getItem("dash_compare")!=="false",n=localStorage.getItem("dash_btn_label")||"Heute",o={Heute:"heute",Gestern:"gestern","Diese Woche":"woche","Letzte 7 Tage":"7tage","Letzte 30 Tage":"30tage","Dieser Monat":"monat"},d;o[n]?d=$(o[n]):d=l||$("heute");let i=new Date().getFullYear(),w='<option value="" disabled selected>Jahr ausw\xE4hlen...</option>';for(let r=i;r>=2013;r--)w+=`<option value="jahr_${r}">Jahr ${r}</option>`;a.innerHTML=`
+  `,document.head.appendChild(e),oe=!0}function F(e){let o=new Date,t=new Date,l=new Date;if(t.setHours(0,0,0,0),l.setHours(23,59,59,999),e&&e.startsWith("jahr_")){let n=parseInt(e.split("_")[1]);t.setFullYear(n,0,1),l.setFullYear(n,11,31)}else switch(e){case"heute":break;case"gestern":t.setDate(o.getDate()-1),l.setDate(o.getDate()-1);break;case"woche":{let n=o.getDay(),a=o.getDate()-n+(n===0?-6:1);t.setDate(a);break}case"7tage":t.setDate(o.getDate()-6);break;case"30tage":t.setDate(o.getDate()-29);break;case"monat":t.setDate(1);break;case"jahr":t.setMonth(0,1);break}let s=n=>{let a=d=>String(d).padStart(2,"0");return`${n.getFullYear()}-${a(n.getMonth()+1)}-${a(n.getDate())}T${a(n.getHours())}:${a(n.getMinutes())}:${a(n.getSeconds())}`};return{from:s(t),to:s(l)}}function ae(e){ue();let o=document.querySelector(".controls");if(!o)return;let t=localStorage.getItem("dash_range"),l=t?JSON.parse(t):null,s=localStorage.getItem("dash_compare")!=="false",n=localStorage.getItem("dash_btn_label")||"Heute",a={Heute:"heute",Gestern:"gestern","Diese Woche":"woche","Letzte 7 Tage":"7tage","Letzte 30 Tage":"30tage","Dieser Monat":"monat"},d;a[n]?d=F(a[n]):d=l||F("heute");let i=new Date().getFullYear(),w='<option value="" disabled selected>Jahr ausw\xE4hlen...</option>';for(let r=i;r>=2013;r--)w+=`<option value="jahr_${r}">Jahr ${r}</option>`;o.innerHTML=`
     <div class="period-container">
       <button class="period-btn" id="periodBtn">${n}</button>
 
@@ -562,5 +540,5 @@
       <span class="slider"></span>
       <span>Vergleich Vorperiode</span>
     </label>
-  `;let g=document.getElementById("periodBtn"),h=document.getElementById("periodDropdown"),u=document.getElementById("archiveSelect"),E=document.getElementById("customToggleItem"),k=document.getElementById("inlineRangeBox"),z=document.getElementById("inlineApplyBtn"),S=document.getElementById("compareToggle"),I=document.getElementById("inlineFromDate"),x=document.getElementById("inlineToDate"),m=r=>{r&&r.from&&r.to&&(I.value=r.from.split("T")[0],x.value=r.to.split("T")[0])},b=localStorage.getItem("dash_custom_from"),f=localStorage.getItem("dash_custom_to");n==="Individuell"&&b&&f?(I.value=b,x.value=f):m(d),g.onclick=r=>{r.stopPropagation(),h.classList.toggle("hidden")},document.addEventListener("click",()=>{h.classList.add("hidden")}),h.onclick=r=>r.stopPropagation();let v=r=>({from:r.from,to:r.to,compare:S.checked?1:0}),c=(r,p)=>{n=r,d=p,g.textContent=r,N(p,r),h.classList.add("hidden"),r!=="Individuell"&&m(p),e&&e(v(p))};h.querySelectorAll(".period-item:not(.custom-toggle)").forEach(r=>{r.onclick=()=>{let p=r.getAttribute("data-key"),T=$(p);u.value="",k.classList.add("hidden"),c(r.textContent,T)}}),u.onchange=()=>{let r=u.value;if(!r)return;let p=$(r);k.classList.add("hidden"),c(`Jahr ${r.split("_")[1]}`,p)},E.onclick=()=>{k.classList.toggle("hidden")},z.onclick=()=>{let r=I.value,p=x.value;if(!r||!p)return;localStorage.setItem("dash_custom_from",r),localStorage.setItem("dash_custom_to",p);let T={from:`${r}T00:00:00`,to:`${p}T23:59:59`};u.value="",c("Individuell",T)},S.onchange=()=>{let r=S.checked;R(r),e&&e(v(d))},N(d,n),R(s),e&&e(v(d))}var _=null,H=null,O=1,j=null;async function M(){try{if(!_||!H){console.warn("loadAll() called before from/to set");return}let e="POST",a="api/dashboard",t={};if(e==="POST")t={method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({node:D,from_ts:_,to_ts:H,compare:O})};else{let o=new URLSearchParams({node:D,from:_,to:H,compare:O});a+=`?${o.toString()}`,t={method:"GET"}}let l=await fetch(a,t);if(!l.ok)throw new Error("API error");let s=await l.json();console.log(s),j=s.timeseries,W(s.kpis),re({level:s.cards.level,node:s.cards.node,items:s.cards.items,stats:s.timeseries.current.stats,series:s.timeseries.current.series});let n=document.documentElement.getAttribute("data-theme")||"light";A(s.timeseries,n),L()}catch(e){console.error("Dashboard load failed:",e)}}document.addEventListener("DOMContentLoaded",()=>{oe(({from:e,to:a,compare:t})=>{_=e,H=a,O=t?1:0,M()}),window.addEventListener("themeChanged",e=>{let a=e.detail;j&&A(j,a)}),setInterval(M,6e4)});var V={name:"\u2713 smartmeter-dashboard ",app:"hc_smet",version:"1.6.0"};console.info("%c "+V.name+"    %c \u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E Version: "+V.version+" \u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E ","color:#FFFFFF; background:#3498db;display:inline-block;font-size:12px;font-weight:200;padding: 4px 0 4px 0","color:#2c3e50; background:#ecf0f1;display:inline-block;font-size:12px;font-weight:200;padding: 4px 0 4px 0");console.log("[cards-layout] loaded \u2014 version:",V.version);})();
+  `;let f=document.getElementById("periodBtn"),h=document.getElementById("periodDropdown"),u=document.getElementById("archiveSelect"),T=document.getElementById("customToggleItem"),k=document.getElementById("inlineRangeBox"),z=document.getElementById("inlineApplyBtn"),S=document.getElementById("compareToggle"),I=document.getElementById("inlineFromDate"),x=document.getElementById("inlineToDate"),p=r=>{r&&r.from&&r.to&&(I.value=r.from.split("T")[0],x.value=r.to.split("T")[0])},g=localStorage.getItem("dash_custom_from"),b=localStorage.getItem("dash_custom_to");n==="Individuell"&&g&&b?(I.value=g,x.value=b):p(d),f.onclick=r=>{r.stopPropagation(),h.classList.toggle("hidden")},document.addEventListener("click",()=>{h.classList.add("hidden")}),h.onclick=r=>r.stopPropagation();let v=r=>({from:r.from,to:r.to,compare:S.checked?1:0}),c=(r,m)=>{n=r,d=m,f.textContent=r,O(m,r),h.classList.add("hidden"),r!=="Individuell"&&p(m),e&&e(v(m))};h.querySelectorAll(".period-item:not(.custom-toggle)").forEach(r=>{r.onclick=()=>{let m=r.getAttribute("data-key"),D=F(m);u.value="",k.classList.add("hidden"),c(r.textContent,D)}}),u.onchange=()=>{let r=u.value;if(!r)return;let m=F(r);k.classList.add("hidden"),c(`Jahr ${r.split("_")[1]}`,m)},T.onclick=()=>{k.classList.toggle("hidden")},z.onclick=()=>{let r=I.value,m=x.value;if(!r||!m)return;localStorage.setItem("dash_custom_from",r),localStorage.setItem("dash_custom_to",m);let D={from:`${r}T00:00:00`,to:`${m}T23:59:59`};u.value="",c("Individuell",D)},S.onchange=()=>{let r=S.checked;R(r),e&&e(v(d))},O(d,n),R(s),e&&e(v(d))}var P=null,A=null,N=1,j=null;async function L(){try{if(!P||!A){console.warn("loadAll() called before from/to set");return}let e="POST",o="api/dashboard",t={};if(e==="POST")t={method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({node:B,from_ts:P,to_ts:A,compare:N})};else{let a=new URLSearchParams({node:B,from:P,to:A,compare:N});o+=`?${a.toString()}`,t={method:"GET"}}let l=await fetch(o,t);if(!l.ok)throw new Error("API error");let s=await l.json();console.log(s),j=s.timeseries,V(s.kpis),re({level:s.cards.level,node:s.cards.node,items:s.cards.items,stats:s.timeseries.current.stats,series:s.timeseries.current.series});let n=document.documentElement.getAttribute("data-theme")||"light";_(s.timeseries,n),$()}catch(e){console.error("Dashboard load failed:",e)}}document.addEventListener("DOMContentLoaded",()=>{ae(({from:e,to:o,compare:t})=>{P=e,A=o,N=t?1:0,L()}),window.addEventListener("themeChanged",e=>{let o=e.detail;j&&_(j,o)}),setInterval(L,6e4)});var J={name:"\u2713 smartmeter-dashboard ",app:"hc_smet",version:"1.6.0"};console.info("%c "+J.name+"    %c \u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E Version: "+J.version+" \u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E\u25AA\uFE0E ","color:#FFFFFF; background:#3498db;display:inline-block;font-size:12px;font-weight:200;padding: 4px 0 4px 0","color:#2c3e50; background:#ecf0f1;display:inline-block;font-size:12px;font-weight:200;padding: 4px 0 4px 0");console.log("[cards-layout] loaded \u2014 version:",J.version);})();
 //# sourceMappingURL=app.bundle.js.map

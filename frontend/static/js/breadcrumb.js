@@ -43,14 +43,10 @@ function injectStyles() {
             font-size: 1.6rem;
             font-weight: 500;
 
-            // ☀️🌙 NATIVE THEME VARIABLES (Ersetzt harte Farben)
             color: var(--text-main, rgba(255,255,255,0.92));
             background: var(--card-bg, rgba(255,255,255,0.08));
             border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
             transition: .25s ease;
         }
 

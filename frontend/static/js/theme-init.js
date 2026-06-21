@@ -42,11 +42,9 @@ function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
   if (theme === 'dark') {
-    if (icon) icon.textContent = '🌙';
-    if (text) text.textContent = 'Night Mode';
+    if (icon) icon.textContent = '🌙';    
   } else {
-    if (icon) icon.textContent = '☀️';
-    if (text) text.textContent = 'Light Mode';
+    if (icon) icon.textContent = '☀️';    
   }
   window.dispatchEvent(new CustomEvent('themeChanged', { detail: theme }));
 }

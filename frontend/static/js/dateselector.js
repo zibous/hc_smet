@@ -13,7 +13,8 @@ function injectStyles() {
   const style = document.createElement("style");
   style.innerHTML = `
     .header {
-      position: relative !important;
+      position: sticky !important;
+      top: 0 !important;
       z-index: 1000 !important;
     }
 
@@ -32,8 +33,6 @@ function injectStyles() {
       cursor: pointer;
       font-size: 1.35rem;
       font-weight: 500;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
     }
 
     .period-btn::after {
@@ -41,7 +40,7 @@ function injectStyles() {
       opacity: 0.7;
     }
 
-    /* ✨ NEU: Mattiertes, blickdichtes VisionOS-Glas für das Dropdown gegen Durchscheinen */
+    /* ✨ Dropdown Styles */
     .period-dropdown {
       position: absolute !important;
       top: calc(100% + 0.5rem);
@@ -52,21 +51,16 @@ function injectStyles() {
       z-index: 99999 !important;
       max-height: 450px;
       overflow-y: auto;
+      box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.2));
 
-      /* Starke Unschärfe und massiver Schatten für räumliche Abhebung */
-      backdrop-filter: blur(35px) saturate(160%);
-      -webkit-backdrop-filter: blur(35px) saturate(160%);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-
-      /* Theme-Weiche: Sattes Dunkelblau nachts, deckendes Milchweiß tagsüber */
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: var(--bg2, #ffffff);
+      border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
     }
 
     [data-theme="dark"] .period-dropdown {
-      background: rgba(13, 20, 38, 0.94);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+      background: var(--bg2, rgba(13, 20, 38, 0.94));
+      border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+      box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.4));
     }
 
     .period-dropdown.hidden {

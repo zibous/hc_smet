@@ -34,11 +34,11 @@ export function setTheme(t) {
 }
 
 export function initTheme() {
-  $('#bgColor').oninput = function() { applyBgColor(this.value); };
-  $('#bgReset').onclick = () => {
-    applyBgColor(null);
-    $('#bgColor').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  };
+  // $('#bgColor').oninput = function() { applyBgColor(this.value); };
+  // $('#bgReset').onclick = () => {
+  //   applyBgColor(null);
+  //   $('#bgColor').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  // };
 
   const savedBg = localStorage.getItem('dash_bg');
   if (savedBg) applyBgColor(savedBg);

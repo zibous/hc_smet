@@ -30,17 +30,10 @@ function injectStyles() {
             border-radius: 1.8rem;
             cursor: pointer;
 
-            // ☀️🌙 NATIVE THEME VARIABLES (Ersetzt harte Farben)
             color: var(--text-main, #ffffff);
             background: var(--card-bg, rgba(255,255,255,0.10));
             border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-
-            box-shadow:
-                0 8px 24px rgba(0,0,0,0.12),
-                inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
 
             transition:
                 transform .25s ease,
@@ -132,7 +125,6 @@ function injectStyles() {
             padding: 0.35rem 0.7rem;
             border-radius: 999px;
             background: rgba(128,128,128,0.08);
-            backdrop-filter: blur(10px);
         }
 
         .sparkline-wrapper {

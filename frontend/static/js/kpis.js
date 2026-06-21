@@ -25,14 +25,10 @@ export function renderKPIs(kpis) {
                 border-radius: 1.0rem;
                 transition: .25s ease;
 
-                // ☀️🌙 NATIVE THEME VARIABLES (Ersetzt harte Farben)
                 color: var(--text-main, #ffffff);
                 background: var(--card-bg, rgba(255,255,255,0.08));
                 border: 1px solid var(--border, rgba(255,255,255,0.10));
-
-                backdrop-filter: blur(18px);
-                -webkit-backdrop-filter: blur(18px);
-                box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+                box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.1));
             }
 
             .kpi:hover {
