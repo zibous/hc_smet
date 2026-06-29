@@ -7,7 +7,7 @@ from datetime import datetime
 
 from app.core.app_config import settings
 from app.infrastructure.database.dbconnect import Database
-from app.schemas.kpi import KpiHero, KpiIndicator, KpiResponse
+from app.schemas.kpi import KpiHero, KpiIndicator, KpiMetric, KpiResponse
 
 logger = logging.getLogger(__name__)
 
@@ -106,4 +106,9 @@ class KpiService:
                 type="sparkline",
                 values=sparkline,
             ) if sparkline else None,
+            metrics=[
+                KpiMetric(label="Aktuell", value=total_watt, unit="W"),
+                KpiMetric(label="Sensoren", value=active_sensors),
+                KpiMetric(label="Heute", value=today_kwh, unit="kWh"),
+            ],
         )
