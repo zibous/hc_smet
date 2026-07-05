@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Webhook-Integration für Home Assistant.
-
-Sendet periodisch System-Health-Daten an einen konfigurierten Webhook-Endpoint.
-Optional — nur aktiv wenn HA_WEBHOOK_URL und HA_WEBHOOK_ID in der .env gesetzt sind.
+"""
+Generischer Webhook-Publisher (Standard v2) für hc_smet
+========================================================
+Heartbeat alle 60s mit Haus-Verbrauch + Geschoss-Aufschlüsselung.
 """
 
 import logging
 import threading
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+import time
+from datetime import date, datetime, timezone
+from typing import Any, Callable, Dict, Optional
 
 import requests
+from pydantic import BaseModel
 
 from app.core.app_config import settings
 
 logger = logging.getLogger(__name__)
+
+APP_ID = "hc_smet"
 
 
 class Webhook:
@@ -31,107 +35,168 @@ class Webhook:
 
     def send(self, data: Optional[Dict[str, Any]] = None) -> bool:
         try:
-            response = requests.post(
-                self.url,
-                json=data or {},
-                timeout=self.timeout
-            )
+            response = requests.post(self.url, json=data or {}, timeout=self.timeout)
             response.raise_for_status()
             return True
         except requests.RequestException as e:
-            logger.debug(f"Webhook send failed: {e}")
+            logger.debug("Webhook send failed: %s", e)
             return False
 
 
 class WebhookPublisher:
-    """Periodischer Webhook Publisher für System-Health-Daten.
+    """Generischer Publisher. Callbacks liefern Pydantic-Schemas."""
 
-    Sendet alle MQTT_INTERVAL Sekunden die System-Health an Home Assistant.
-    Nutzt den gleichen Intervall wie MQTT (da beide HA-Integrationen sind).
-    """
-
-    def __init__(self):
+    def __init__(
+        self,
+        build_heartbeat: Callable[[], BaseModel],
+        build_daily: Optional[Callable[[], BaseModel]] = None,
+        build_monthly: Optional[Callable[[], BaseModel]] = None,
+    ):
         self._webhook: Optional[Webhook] = None
         self._timer: Optional[threading.Timer] = None
-        self._interval = settings.MQTT_INTERVAL  # Gleicher Intervall wie MQTT
+        self._running = False
+        self._start_time = time.time()
+        self._last_day: Optional[str] = None
+        self._last_month: Optional[tuple] = None
+        self._interval = 60
+
+        self._build_heartbeat = build_heartbeat
+        self._build_daily = build_daily
+        self._build_monthly = build_monthly
 
     def start(self):
-        """Startet den periodischen Webhook-Publisher."""
         url = getattr(settings, "HA_WEBHOOK_URL", "") or ""
         wid = getattr(settings, "HA_WEBHOOK_ID", "") or ""
 
-        if not url or not wid:
-            logger.info("Webhook ist deaktiviert (HA_WEBHOOK_URL/ID nicht gesetzt).")
+        if not url.strip() or not wid.strip():
+            logger.info("Webhook deaktiviert (HA_WEBHOOK_URL/ID nicht gesetzt)")
             return
 
         self._webhook = Webhook(base_url=url, webhook_id=wid)
-        logger.info(f"✅ Webhook Publisher gestartet: {self._webhook.url} (Intervall: {self._interval}s)")
+        self._running = True
+        self._last_day = date.today().isoformat()
+        self._last_month = (date.today().year, date.today().month)
 
-        # Ersten Zyklus starten
-        self._schedule()
+        logger.info("✅ Webhook Publisher gestartet: %s (Intervall: %ds)", self._webhook.url, self._interval)
+
+        # Erster Heartbeat sofort
+        self._send_heartbeat()
+        self._schedule_next()
 
     def stop(self):
-        """Stoppt den periodischen Publisher."""
+        self._running = False
         if self._timer:
             self._timer.cancel()
             self._timer = None
 
-    def _schedule(self):
-        """Plant den nächsten Webhook-Aufruf."""
-        if self._timer:
-            self._timer.cancel()
-        self._timer = threading.Timer(self._interval, self._publish)
+    def _schedule_next(self):
+        if not self._running:
+            return
+        self._timer = threading.Timer(self._interval, self._tick)
         self._timer.daemon = True
         self._timer.start()
 
-    def _publish(self):
-        """Sendet System-Health-Daten an den Webhook."""
+    def _tick(self):
+        if not self._running:
+            return
+        self._check_day_change()
+        self._check_month_change()
+        self._send_heartbeat()
+        self._schedule_next()
+
+    def _base_payload(self, event: str) -> Dict[str, Any]:
+        return {
+            "event": event,
+            "app_id": APP_ID,
+            "version": getattr(settings, "APP_VERSION", ""),
+            "ts": datetime.now().isoformat(timespec="seconds"),
+        }
+
+    def _send_heartbeat(self):
         if not self._webhook:
             return
-
         try:
-            from app.api.settingsdata import get_system_health
-
-            health = get_system_health()
-            payload = {
-                "event": "health_update",
-                "application": settings.APP_NAME,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                **health
-            }
-
-            ok = self._webhook.send(payload)
-            if ok:
-                logger.debug("Webhook health_update gesendet.")
+            schema = self._build_heartbeat()
+            payload = self._base_payload("heartbeat")
+            payload["uptime_s"] = int(time.time() - self._start_time)
+            payload["status"] = "ok"
+            payload["kpi"] = schema.model_dump()
+            self._webhook.send(payload)
         except Exception as e:
-            logger.debug(f"Webhook publish fehlgeschlagen: {e}")
+            logger.debug("Heartbeat fehlgeschlagen: %s", e)
 
-        # Nächsten Zyklus planen
-        self._schedule()
+    def _check_day_change(self):
+        today = date.today().isoformat()
+        if self._last_day and today != self._last_day and self._build_daily:
+            try:
+                schema = self._build_daily()
+                payload = self._base_payload("daily_summary")
+                payload["date"] = self._last_day
+                payload["summary"] = schema.model_dump()
+                if self._webhook:
+                    self._webhook.send(payload)
+                logger.info("daily_summary gesendet für %s", self._last_day)
+            except Exception as e:
+                logger.warning("daily_summary fehlgeschlagen: %s", e)
+        self._last_day = today
+
+    def _check_month_change(self):
+        now = date.today()
+        current_month = (now.year, now.month)
+        if self._last_month and current_month != self._last_month and self._build_monthly:
+            year, month = self._last_month
+            try:
+                schema = self._build_monthly()
+                payload = self._base_payload("monthly_summary")
+                payload["year"] = year
+                payload["month"] = month
+                payload["summary"] = schema.model_dump()
+                if self._webhook:
+                    self._webhook.send(payload)
+                logger.info("monthly_summary gesendet für %d-%02d", year, month)
+            except Exception as e:
+                logger.warning("monthly_summary fehlgeschlagen: %s", e)
+        self._last_month = current_month
 
 
-def notify_ha(event: str, **kwargs) -> bool:
-    """Sendet ein einzelnes Event an Home Assistant (wenn konfiguriert).
+# ══════════════════════════════════════════════════════════════════════
+# notify_ha() – für einzelne Events
+# ══════════════════════════════════════════════════════════════════════
 
-    Usage:
-        notify_ha("app_start", version="2.2.0")
-        notify_ha("error", message="Device unreachable", severity="critical")
-    """
+_webhook: Optional[Webhook] = None
+_webhook_checked: bool = False
+
+
+def _get_webhook() -> Optional[Webhook]:
+    global _webhook, _webhook_checked
+    if _webhook_checked:
+        return _webhook
+    _webhook_checked = True
     url = getattr(settings, "HA_WEBHOOK_URL", "") or ""
     wid = getattr(settings, "HA_WEBHOOK_ID", "") or ""
+    if url.strip() and wid.strip():
+        _webhook = Webhook(base_url=url, webhook_id=wid)
+        return _webhook
+    return None
 
-    if not url or not wid:
+
+def notify_ha(event: str, **kwargs: Any) -> bool:
+    """Sendet ein einzelnes Event an Home Assistant."""
+    wh = _get_webhook()
+    if not wh:
         return False
-
     try:
-        wh = Webhook(base_url=url, webhook_id=wid)
         payload: Dict[str, Any] = {
             "event": event,
-            "application": settings.APP_NAME,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "app_id": APP_ID,
+            "version": getattr(settings, "APP_VERSION", ""),
+            "ts": datetime.now().isoformat(timespec="seconds"),
         }
         payload.update(kwargs)
-        return wh.send(payload)
+        ok = wh.send(payload)
+        if ok:
+            logger.debug("Webhook sent: %s", event)
+        return ok
     except Exception as e:
-        logger.debug(f"Webhook error: {e}")
+        logger.debug("Webhook error: %s", e)
         return False

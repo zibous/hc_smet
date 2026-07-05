@@ -1,7 +1,7 @@
 services:
-  hc_smet2:
+  hc_smet:
     build: .
-    container_name: hc_smet2
+    container_name: hc_smet
     restart: unless-stopped
 
     ports:
@@ -14,7 +14,7 @@ services:
       - ${PWD}/logs:/app/logs
 
     env_file:
-      - ./app/.env
+      - ./.env
 
     environment:
       - TZ=Europe/Vaduz

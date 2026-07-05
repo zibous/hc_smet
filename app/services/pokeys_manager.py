@@ -24,6 +24,7 @@ from datetime import datetime
 import yaml
 
 from app.core.app_config import settings
+from app.core.webhook import notify_ha
 from app.domain.pokey_device import PoKeysDevice
 from app.domain.s0_sensor import S0Sensor
 from app.infrastructure.database.dbconnect import Database
@@ -271,18 +272,27 @@ class PoKeysManager:
                 result = self.network.fetch(dev.ip)
             except Exception as e:
                 logger.error(f"Netzwerkfehler für {dev.ip}: {e}")
+                was_online = dev.online
                 dev.mark_offline()
                 for sid in dev.sensors:
                     self.sensors[sid].online = False
+                if was_online:
+                    notify_ha("device_offline", device_id=dev.id, ip=dev.ip, message=str(e))
                 continue
 
             if not result.get("online", False):
+                was_online = dev.online
                 dev.mark_offline()
                 for sid in dev.sensors:
                     self.sensors[sid].online = False
+                if was_online:
+                    notify_ha("device_offline", device_id=dev.id, ip=dev.ip, message="Keine Antwort")
                 continue
 
+            was_offline = not dev.online
             dev.mark_online()
+            if was_offline:
+                notify_ha("device_online", device_id=dev.id, ip=dev.ip)
             data = result.get("data", {})
 
             for s in data.get("sensors", []):
