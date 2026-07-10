@@ -1,6 +1,9 @@
 # hc_smet – Smart Meters (50 S0-Stromzähler Dashboard)
 
-Granulare Stromverbrauchsmessung auf Raum- und Geräteebene mit 50 S0-Impulszählern, zwei PoKeys57E Ethernet-Controllern und einem FastAPI-Dashboard – inklusive 13 Jahre Messhistorie.
+Granulare Stromverbrauchsmessung auf Raum- und Geräteebene mit 50 S0-Impulszählern,
+zwei PoKeys57E Ethernet-Controllern und einem FastAPI-Dashboard – inklusive 13 Jahre Messhistorie.
+
+![Screenshot der Anwendung](./docs/smartmeters.png)
 
 ## Features
 
@@ -40,7 +43,7 @@ Granulare Stromverbrauchsmessung auf Raum- und Geräteebene mit 50 S0-Impulszäh
 └──────────────┬──────────────┘         │  /api/dashboard                  │
                │                        │  /api/yearly                     │
                ▼                        │  /api/kpidata                    │
-┌─────────────────────────────┐         │  / (Dashboard SPA)              │
+┌─────────────────────────────┐         │  / (Dashboard SPA)               │
 │  SensorService              │         │  /live (Live Dashboard)          │
 │  • Normalisierung           │         └──────────────┬───────────────────┘
 │  • Reset-Erkennung          │                        │
@@ -49,7 +52,7 @@ Granulare Stromverbrauchsmessung auf Raum- und Geräteebene mit 50 S0-Impulszäh
 └──────────────┬──────────────┘         │  DashboardService                │
                │                        │  • Zeitreihen (stündlich)        │
                ▼                        │  • Vergleichszeiträume           │
-┌─────────────────────────────┐         │  • KPI-Cards                    │
+┌─────────────────────────────┐         │  • KPI-Cards                     │
 │  EnergyAggregator           │         └──────────────────────────────────┘
 │  • Stundenwerte aggregieren │
 │  • DB Upsert (Thread-safe)  │
@@ -60,17 +63,17 @@ Granulare Stromverbrauchsmessung auf Raum- und Geräteebene mit 50 S0-Impulszäh
 │  SQLite DB (pro Jahr)       │     │  HouseTopology (house.yaml)        │
 │  sensors_2026.db            │     │  • 50 Sensoren                     │
 │  ├── current_values         │     │  • 20 Räume                        │
-│  └── hourly_values          │     │  • 6 Bereiche (EG,WG,OG,DG,OS,NU) │
+│  └── hourly_values          │     │  • 6 Bereiche (EG,WG,OG,DG,OS,NU)  │
 └──────────────┬──────────────┘     │  • 1 Haus (HOME)                   │
                │                    └────────────────────────────────────┘
                ▼
 ┌─────────────────────────────┐     ┌────────────────────────────────────┐
 │  Calculator (on-demand)     │     │  MQTT Publisher                    │
-│  • Tages-/Wochen-/Monats-  │     │  smartmeters/sensors/{id}          │
+│  • Tages-/Wochen-/Monats-   │     │  smartmeters/sensors/{id}          │
 │    /Jahresverbrauch         │     │  smartmeters/rooms/{id}            │
 │  • Vorperioden-Vergleich    │     │  smartmeters/areas/{id}            │
-│  • Raum/Bereich/Haus-Aggr. │     │  smartmeters/home                  │
-└─────────────────────────────┘     │  (alle 5 Minuten)                 │
+│  • Raum/Bereich/Haus-Aggr.  │     │  smartmeters/home                  │
+└─────────────────────────────┘     │  (alle 5 Minuten)                  │
                                     └────────────────────────────────────┘
                │
                ▼
@@ -237,45 +240,46 @@ hc_smet/
 │   │   └── settingsdata.py         # /api/settings
 │   ├── core/
 │   │   ├── app_config.py           # Pydantic Settings + Device Models
+│   │   ├── fastapi_config.py       # Static Version Config
 │   │   ├── logging_setup.py        # Logger
 │   │   ├── middleware.py           # CORS, NoCaching
-│   │   └── webhook.py              # HA Webhook Client
+│   │   ├── validator.py            # Sensor-Wert Validierung
+│   │   └── webhook.py              # HA Webhook Client + Publisher
 │   ├── domain/
 │   │   ├── house.yaml              # Haus-Topologie (Sensoren/Räume/Bereiche)
 │   │   ├── house.py                # HouseTopology Parser
 │   │   ├── pokey_device.py         # PoKey Device Abstraction
 │   │   └── s0_sensor.py            # S0 Sensor Model
 │   ├── infrastructure/
-│   │   └── ...                     # DB, MQTT Low-Level
-│   ├── models/
-│   │   └── ...                     # Pydantic Models
+│   │   ├── builders/               # Dashboard + Data Builder
+│   │   ├── database/               # SQLite DB Connect + Repositories
+│   │   ├── parsers/                # POST-Daten Parser
+│   │   ├── simulation/             # Simulator
+│   │   └── network_client.py       # HTTP Client für GET-Modus
 │   ├── schemas/
-│   │   └── kpi.py                  # KPI Response Schema
+│   │   ├── kpi.py                  # KPI Response Schema
+│   │   ├── dashboard.py            # Dashboard Schemas
+│   │   ├── house.py                # Haus-Topologie Schemas
+│   │   ├── sensors.py              # Sensor Schemas
+│   │   ├── settings.py             # Settings Schemas
+│   │   └── webhook_data.py         # Webhook Payload Schemas
 │   └── services/
 │       ├── sensor_service.py       # Datenverarbeitung + Reset-Erkennung
-│       ├── calcdata.py             # Periodenberechnung (Tag/Woche/Monat/Jahr)
 │       ├── dashboard_service.py    # Dashboard Aggregation
-│       ├── db_manager.py           # SQLite (EnergyAggregator)
 │       ├── pokeys_manager.py       # PoKeys Polling (GET-Modus)
 │       ├── mqtt_publisher.py       # MQTT Publish + Discovery
-│       ├── ha_discovery.py         # HA Auto-Discovery Config
 │       ├── kpi_service.py          # KPI-Berechnung
 │       ├── webhook_builder.py      # Webhook Payload Builder
-│       ├── body_metrics.py         # Körperdaten-Analyse (Fitness)
-│       ├── body_scales.py          # Bewertungsskalen
-│       ├── body_score.py           # Score-Berechnung
 │       ├── startup.py              # Init-Logik
 │       └── state/                  # RAM State Management
-├── config/
-│   ├── ha_discovery.yaml           # HA Discovery Templates
-│   ├── persons.yaml                # Personen-Profile (Fitness)
-│   └── lang/                       # i18n
 ├── data/
 │   ├── sensors_2013.db ... sensors_2026.db  # Jahr-DBs
 │   ├── analytics.sqlite            # Analytics-DB
 │   └── pokeys_state.json           # Letzter State
 ├── frontend/
-│   ├── static/js/                  # ES-Module Dashboard
+│   ├── static/
+│   │   ├── js/                     # ES-Module Dashboard + Live
+│   │   └── css/                    # Styles + Bundle
 │   └── templates/                  # Jinja2 HTML
 ├── analytics/                      # Separater Analytics-Container
 ├── scripts/                        # Import, Simulation, Verify

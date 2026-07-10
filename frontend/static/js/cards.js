@@ -43,7 +43,9 @@ function injectStyles() {
 
         .card:hover {
             transform: translateY(-4px);
-            border-color: var(--primary, #3182ce);
+            border-left-color: var(--primary, #3182ce);
+            border-right-color: var(--primary, #3182ce);
+            border-bottom-color: var(--primary, #3182ce);
             box-shadow: 0 12px 28px rgba(0,0,0,0.18);
         }
 
@@ -174,7 +176,7 @@ function injectStyles() {
    SPARKLINE (Dynamische Kurven-Farben)
 ---------------------------------------------------- */
 
-function drawSparkline(canvas, values) {
+function drawSparkline(canvas, values, color) {
 
     if (!values || values.length < 2) return;
 
@@ -215,13 +217,15 @@ function drawSparkline(canvas, values) {
     const normalized = sampled.map(v => (v - min) / range);
     const stepX = width / (normalized.length - 1);
 
-    // 🔧 DYNAMISCHE CURVEN-FARBEN (Optimiert für Deep-Midnight Hintergrund)
+    // Farbe: Chart-Farbe als Parameter verwenden, Fallback auf alte Logik
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const lineColor = color || (isDark ? "hsla(28, 100%, 58%, 1)" : "#2b6cb0");
+    const shadowColor = color || (isDark ? "hsla(28, 100%, 60%, 1)" : "#4299e1");
 
-    // Anhebung von Sättigung und Helligkeit im Darkmode gegen das Absaufen im Schwarz
-    const lineColor = isDark ? "hsla(28, 100%, 58%, 1)" : "#2b6cb0";
-    const shadowColor = isDark ? "hsla(28, 100%, 60%, 1)" : "#4299e1";
-    const gradientStart = isDark ? "rgba(255, 119, 0, 0.28)" : "rgba(66, 153, 225, 0.25)";
+    // Gradient aus der übergebenen Farbe ableiten
+    const gradientStart = color
+        ? color.replace(/,\s*[\d.]+\)$/, ", 0.28)")
+        : (isDark ? "rgba(255, 119, 0, 0.28)" : "rgba(66, 153, 225, 0.25)");
 
     // AREA GRADIENT
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -251,10 +255,10 @@ function drawSparkline(canvas, values) {
         else ctx.lineTo(x, y);
     });
 
-    ctx.lineWidth = 1.6; // Minimal dicker für mehr Präsenz im Raum
+    ctx.lineWidth = 1.6;
     ctx.strokeStyle = lineColor;
     ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = isDark ? 10 : 2; // Kräftigerer Glow bei Nacht
+    ctx.shadowBlur = isDark ? 10 : 2;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     ctx.stroke();
@@ -282,11 +286,26 @@ export function renderCards(data) {
 
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
 
-    items.forEach(item => {
+    // Farben analog zum Chart generieren (gleiche HSL-Hue-Rotation)
+    const seriesKeys = Object.keys(series);
+    const totalKeys = Math.max(1, seriesKeys.length);
+
+    items.forEach((item, itemIndex) => {
         const isSelfNode = item.level == 4;
 
         const s = stats[item.id] || { current: 0, delta: 0, min: 0, max: 0, avg: 0 };
         const values = Array.isArray(series[item.id]) ? series[item.id] : [];
+
+        // Chart-Farbe für diese Karte berechnen (gleiche Formel wie in chart.js)
+        const keyIndex = seriesKeys.indexOf(item.id);
+        const colorIndex = keyIndex >= 0 ? keyIndex : itemIndex;
+        const baseHue = (colorIndex * (360 / totalKeys)) % 360;
+        const chartColor = isDark
+            ? `hsla(${baseHue}, 100%, 65%, 1)`
+            : `hsla(${baseHue}, 90%, 55%, 1)`;
+        const chartColorMuted = isDark
+            ? `hsla(${baseHue}, 80%, 55%, 0.25)`
+            : `hsla(${baseHue}, 70%, 50%, 0.15)`;
 
         const card = document.createElement("div");
 
@@ -300,6 +319,9 @@ export function renderCards(data) {
         if (isDark) {
             card.style.background = "rgba(30, 41, 59, 0.22)";
         }
+
+        // Farbige Oberkante als Akzent (Chart-Farbe)
+        card.style.borderTop = `3px solid ${chartColor}`;
 
         card.setAttribute("data-active", s.current > 0 ? "true" : "false");
         const positive = s.delta >= 0;
@@ -348,7 +370,7 @@ export function renderCards(data) {
 
         const canvas = card.querySelector(".sparkline");
         if (canvas && values.length > 0) {
-            drawSparkline(canvas, values);
+            drawSparkline(canvas, values, chartColor);
         }
     });
 }
