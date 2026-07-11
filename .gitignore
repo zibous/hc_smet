@@ -16,20 +16,22 @@ build/
 venv/
 ENV/
 
-# Database
-# *.db
-# *.db-shm
-# *.db-wal
-# *.sqlite
-# *.sqlite3
-
 # Logs
 logs/
 *.log
 
 # Data
-# data/
+data/*.db
+data/export
 !data/.gitkeep
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
 
 # IDE
 .vscode/
