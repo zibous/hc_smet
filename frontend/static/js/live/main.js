@@ -3,9 +3,21 @@
  * Steuert Tabs und initialisiert die Komponenten
  */
 
-import { initSensors, refreshSensors } from './sensors.js';
-import { initHourly, refreshHourly } from './hourly.js';
-import { initAnalytics, refreshAnalytics } from './analytics.js';
+import { refreshAnalytics } from './analytics.js';
+import { refreshHourly } from './hourly.js';
+import { refreshSensors } from './sensors.js';
+
+// =================================================================
+// HILFSFUNKTION: Header-Timestamp aktualisieren
+// =================================================================
+function updateHeaderTimestamp() {
+  const el = document.getElementById('header-update');
+  if (!el) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('sv-SE');
+  const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  el.textContent = `${dateStr} um ${timeStr} Uhr`;
+}
 
 // =================================================================
 // TAB NAVIGATION
@@ -46,6 +58,8 @@ async function init() {
 setInterval(() => {
   if (activeTab === 'sensors') refreshSensors();
   if (activeTab === 'hourly') refreshHourly();
+  updateHeaderTimestamp();
 }, 30000);
 
 init();
+updateHeaderTimestamp();

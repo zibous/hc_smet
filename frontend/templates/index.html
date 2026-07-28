@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartMeters Dashboard</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E⚡%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E⚡%3C/text%3E%3C/svg%3E">
 
   <!-- Chart.js  und style.css -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,41 +15,52 @@
 
 <body>
 
-    <header class="header" style="position: relative; padding-right: 20px;">
-    <div class="header-layout-wrap" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+  <header class="header" style="position: relative; padding-right: 20px;">
+    <div class="header-layout-wrap"
+      style="display:flex; justify-content:space-between; align-items:center; width:100%;">
       <div>
-        <div class="title" style="font-size: 3.5rem; font-weight: bold;"><span style="color: #22c55e;">Smart</span><span style="color: #06b6d4;">Meters</span> Dashboard</div>
+        <div class="title" style="font-size: 3.5rem; font-weight: bold;"><span style="color: #22c55e;">Smart</span><span
+            style="color: #06b6d4;">Meters</span> Dashboard</div>
         <div class="subtitle">Pokey Smartmeters</div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:8px; position: relative; z-index: 2;">
-        <a href="live" class="nav-link">📡 Live</a>
+      <!-- Rechts: SVG und Button in Row 1, Badge in Row 2 unter SVG -->
+      <div
+        style="display:grid; grid-template-columns: auto auto; grid-template-rows: 70px auto; align-items:center; gap:0 16px; position:relative; z-index:2;">
+
+        <!-- Row 1, Col 1: SVG -->
+        <svg
+          style="width:auto; height:70px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0.55; grid-column:1; grid-row:1;"
+          viewBox="0 0 800 200">
+          <path d="M 130 70 A 40 40 0 0 1 130 130 M 115 55 A 60 60 0 0 1 115 145 M 100 40 A 80 80 0 0 1 100 160"
+            stroke="#06b6d4" stroke-width="4" />
+          <circle cx="145" cy="100" r="6" fill="#06b6d4" stroke="none" />
+          <path
+            d="M 50 100 L 90 100 M 160 100 L 290 100 L 305 100 L 315 45 L 330 155 L 345 25 L 360 135 L 370 100 L 410 100"
+            stroke="currentColor" stroke-width="5" />
+          <path d="M 410 100 L 460 100 L 470 65 L 485 145 L 500 35 L 515 125 L 525 100 L 590 100" stroke="currentColor"
+            stroke-width="5" />
+          <rect x="610" y="50" width="100" height="90" rx="10" stroke="#22c55e" stroke-width="4" fill="#22c55e"
+            fill-opacity="0.1" />
+          <rect x="622" y="65" width="76" height="32" rx="4" stroke="#22c55e" stroke-width="2" />
+          <line x1="632" y1="81" x2="688" y2="81" stroke="#22c55e" stroke-width="3" stroke-dasharray="8 4" />
+          <line x1="630" y1="140" x2="630" y2="155" stroke="#22c55e" stroke-width="3" />
+          <line x1="660" y1="140" x2="660" y2="160" stroke="#22c55e" stroke-width="3" />
+          <line x1="690" y1="140" x2="690" y2="155" stroke="#22c55e" stroke-width="3" />
+          <path d="M 710 100 L 760 100" stroke="currentColor" stroke-width="5" />
+        </svg>
+
+        <!-- Row 1, Col 2: Button — sitzt genau auf SVG-Höhe -->
+        <a href="live" class="nav-link" style="grid-column:2; grid-row:1; align-self:center;">📡 Live</a>
+
+        <!-- Row 2, Col 1: Badge — zentriert unter dem SVG -->
+        <span id="header-update" class="header-update-pill"
+          style="grid-column:1; grid-row:2; justify-self:center; margin-top:4px;"></span>
+
       </div>
     </div>
 
-    <div class="header-bg-wrapper" style="position: absolute; right: 80px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;">
-      <svg style="width: auto; height: 70px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55;" viewBox="0 0 800 200">
-        <!-- 📡 Funk-Übertragungswellen links (Cyber-Cyan) -->
-        <path d="M 130 70 A 40 40 0 0 1 130 130 M 115 55 A 60 60 0 0 1 115 145 M 100 40 A 80 80 0 0 1 100 160" stroke="#06b6d4" stroke-width="4" />
-        <circle cx="145" cy="100" r="6" fill="#06b6d4" stroke="none" />
-
-        <!-- ⚡ Verbindungslinie & Puls (In der Textfarbe des Dashboards) -->
-        <path d="M 50 100 L 90 100 M 160 100 L 290 100 L 305 100 L 315 45 L 330 155 L 345 25 L 360 135 L 370 100 L 410 100" stroke="currentColor" stroke-width="5" />
-        <path d="M 410 100 L 460 100 L 470 65 L 485 145 L 500 35 L 515 125 L 525 100 L 590 100" stroke="currentColor" stroke-width="5" />
-
-        <!-- 📟 Digitaler Zähler / Microchip rechts (Smart-Grün) -->
-        <rect x="610" y="50" width="100" height="90" rx="10" stroke="#22c55e" stroke-width="4" fill="#22c55e" fill-opacity="0.1" />
-        <!-- Digitales Display im Zähler -->
-        <rect x="622" y="65" width="76" height="32" rx="4" stroke="#22c55e" stroke-width="2" />
-        <line x1="632" y1="81" x2="688" y2="81" stroke="#22c55e" stroke-width="3" stroke-dasharray="8 4" />
-        <!-- Anschlüsse/Leiterbahnen unten -->
-        <line x1="630" y1="140" x2="630" y2="155" stroke="#22c55e" stroke-width="3" />
-        <line x1="660" y1="140" x2="660" y2="160" stroke="#22c55e" stroke-width="3" />
-        <line x1="690" y1="140" x2="690" y2="155" stroke="#22c55e" stroke-width="3" />
-
-        <path d="M 710 100 L 760 100" stroke="currentColor" stroke-width="5" />
-      </svg>
-    </div>
+    <!-- alter absoluter SVG-Wrapper entfernt -->
   </header>
 
   <main class="container">
@@ -74,9 +86,10 @@
 
   <!-- 🌟 EINHEITLICHER FOOTER: Füge diesen ganz unten im HTML hinzu -->
   <footer class="footer">
-      SmartMeters Dashboard · Echtzeit-Überwachung
-      <span style="margin: 0 8px; color: var(--border);">|</span>
-      <span id="themeToggleFooter" style="cursor:pointer; font-weight:500; text-decoration:underline;">🌓 Design wechseln</span>
+    SmartMeters Dashboard · Echtzeit-Überwachung
+    <span style="margin: 0 8px; color: var(--border);">|</span>
+    <span id="themeToggleFooter" style="cursor:pointer; font-weight:500; text-decoration:underline;">🌓 Design
+      wechseln</span>
   </footer>
 
 

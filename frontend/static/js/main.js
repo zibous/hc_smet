@@ -1,11 +1,11 @@
 // ES6-Module - ESM
 
-import { renderKPIs } from "./kpis.js";
+import { renderBreadcrumb } from "./breadcrumb.js";
 import { renderCards } from "./cards.js";
 import { renderChart } from "./chart.js";
-import { renderBreadcrumb } from "./breadcrumb.js";
-import { currentNode } from "./state.js";
 import { renderPeriodStrip } from "./dateselector.js";
+import { renderKPIs } from "./kpis.js";
+import { currentNode } from "./state.js";
 
 let currentFrom = null;
 let currentTo = null;
@@ -85,6 +85,15 @@ export async function loadAll() {
     renderChart(data.timeseries, currentTheme);
 
     renderBreadcrumb();
+
+    // --- Header-Badge: Datum & Uhrzeit der letzten Aktualisierung ---
+    const headerUpdateEl = document.getElementById('header-update');
+    if (headerUpdateEl) {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('sv-SE');
+      const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      headerUpdateEl.textContent = `${dateStr} um ${timeStr} Uhr`;
+    }
 
   } catch (err) {
     console.error("Dashboard load failed:", err);

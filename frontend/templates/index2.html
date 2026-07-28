@@ -14,40 +14,47 @@
 
 <body>
 
-    <header class="header" style="position: relative; padding-right: 20px;">
-    <div class="header-layout-wrap" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+  <header class="header" style="position: relative; padding-right: 20px;">
+    <div class="header-layout-wrap"
+      style="display:flex; justify-content:space-between; align-items:center; width:100%;">
       <div>
-        <!-- 🌟 HIER NEU: Titel farblich passend zu Echtzeit/Live (Signal-Rot/Orange & Cyan) -->
-        <div class="title" style="font-size: 3.5rem; font-weight: bold;"><span style="color: #ef4444;">Smart</span>Meters <span style="color: #06b6d4;">Live</span></div>
+        <div class="title" style="font-size: 3.5rem; font-weight: bold;"><span
+            style="color: #ef4444;">Smart</span>Meters <span style="color: #06b6d4;">Live</span></div>
         <div class="subtitle">Echtzeit-Sensordaten &bull; Stundenwerte &bull; Analytics</div>
       </div>
-      <!-- Nur noch der Dashboard-Link bleibt hier, z-index schützt vor Überlagerung -->
-      <div style="display:flex; align-items:center; gap:8px; position: relative; z-index: 2;">
-        <a href="./" class="nav-link">📊 Dashboard</a>
+
+      <!-- Rechts: SVG + Button in Row 1, Badge in Row 2 -->
+      <div
+        style="display:grid; grid-template-columns: auto auto; grid-template-rows: 70px auto; align-items:center; gap:0 16px; position:relative; z-index:2;">
+
+        <!-- Row 1, Col 1: SVG -->
+        <svg
+          style="width:auto; height:70px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0.55; grid-column:1; grid-row:1;"
+          viewBox="0 0 800 200">
+          <path d="M 135 140 L 145 60 L 155 140 M 130 110 L 160 110" stroke="#ef4444" stroke-width="3" />
+          <circle cx="145" cy="55" r="5" fill="#ef4444" stroke="none" />
+          <path d="M 165 40 A 25 25 0 0 1 165 70 M 175 30 A 45 45 0 0 1 175 80" stroke="#ef4444" stroke-width="3" />
+          <path
+            d="M 50 100 L 100 100 M 190 100 L 290 100 L 300 100 L 310 30 L 320 170 L 330 40 L 340 150 L 350 80 L 360 120 L 370 100 L 410 100"
+            stroke="currentColor" stroke-width="5" />
+          <path d="M 410 100 L 460 100 L 470 40 L 480 160 L 490 50 L 500 140 L 510 80 L 520 110 L 530 100 L 590 100"
+            stroke="currentColor" stroke-width="5" />
+          <circle cx="650" cy="100" r="45" stroke="#06b6d4" stroke-width="4" stroke-dasharray="12 8" fill="#06b6d4"
+            fill-opacity="0.05" />
+          <circle cx="650" cy="100" r="25" stroke="#06b6d4" stroke-width="3" />
+          <circle cx="650" cy="100" r="5" fill="#06b6d4" stroke="none" />
+          <line x1="650" y1="100" x2="682" y2="68" stroke="#06b6d4" stroke-width="3" />
+          <path d="M 710 100 L 760 100" stroke="currentColor" stroke-width="5" />
+        </svg>
+
+        <!-- Row 1, Col 2: Button -->
+        <a href="./" class="nav-link" style="grid-column:2; grid-row:1; align-self:center;">📊 Dashboard</a>
+
+        <!-- Row 2, Col 1: Badge zentriert unter SVG -->
+        <span id="header-update" class="header-update-pill"
+          style="grid-column:1; grid-row:2; justify-self:center; margin-top:4px;"></span>
+
       </div>
-    </div>
-
-    <!-- 🌟 HIER NEU: Das Live-Hintergrundbild (Live-Signalwellen + schneller Puls) -->
-    <div class="header-bg-wrapper" style="position: absolute; right: 120px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;">
-      <svg style="width: auto; height: 70px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55;" viewBox="0 0 800 200">
-        <!-- 📡 Live-Sendemast & Signalwellen links (Signal-Rot) -->
-        <path d="M 135 140 L 145 60 L 155 140 M 130 110 L 160 110" stroke="#ef4444" stroke-width="3" />
-        <circle cx="145" cy="55" r="5" fill="#ef4444" stroke="none" />
-        <path d="M 165 40 A 25 25 0 0 1 165 70 M 175 30 A 45 45 0 0 1 175 80" stroke="#ef4444" stroke-width="3" />
-
-        <!-- ⚡ Schneller Live-Puls (In der Textfarbe des Dashboards) -->
-        <path d="M 50 100 L 100 100 M 190 100 L 290 100 L 300 100 L 310 30 L 320 170 L 330 40 L 340 150 L 350 80 L 360 120 L 370 100 L 410 100" stroke="currentColor" stroke-width="5" />
-        <path d="M 410 100 L 460 100 L 470 40 L 480 160 L 490 50 L 500 140 L 510 80 L 520 110 L 530 100 L 590 100" stroke="currentColor" stroke-width="5" />
-
-        <!-- 🔄 Echtzeit-Radar/Datenring rechts (Cyber-Cyan) -->
-        <circle cx="650" cy="100" r="45" stroke="#06b6d4" stroke-width="4" stroke-dasharray="12 8" fill="#06b6d4" fill-opacity="0.05" />
-        <circle cx="650" cy="100" r="25" stroke="#06b6d4" stroke-width="3" />
-        <circle cx="650" cy="100" r="5" fill="#06b6d4" stroke="none" />
-        <!-- Radar-Suchstrahl-Linie -->
-        <line x1="650" y1="100" x2="682" y2="68" stroke="#06b6d4" stroke-width="3" />
-
-        <path d="M 710 100 L 760 100" stroke="currentColor" stroke-width="5" />
-      </svg>
     </div>
   </header>
 
@@ -101,15 +108,16 @@
         <span>Live Dashboard &bull; v1.0.0</span>
         <span style="color: var(--border);">&bull;</span>
         <!-- 🌟 HIER NEU: Der Design-Wechsler sauber eingereiht -->
-        <span id="themeToggleFooter" style="cursor: pointer; text-decoration: underline; font-weight: 500;">🌓 Design wechseln</span>
+        <span id="themeToggleFooter" style="cursor: pointer; text-decoration: underline; font-weight: 500;">🌓 Design
+          wechseln</span>
       </div>
     </div>
   </footer>
 
-    <!-- Theme Toggle & Background Color -->
+  <!-- Theme Toggle & Background Color -->
   <script>
     // Setzt das aktuelle Jahr im Footer, sobald das DOM bereit ist
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const cy = document.getElementById('currentYear');
       if (cy) cy.textContent = new Date().getFullYear();
 
@@ -142,7 +150,7 @@
     setTheme(savedTheme || (systemPrefersDark ? 'dark' : 'light'));
 
     // 🌟 GLOBALER KLICK-ABFÄNGER: Reagiert auf den neuen Footer-Link, sobald er geladen ist
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
       if (event.target && event.target.id === 'themeToggleFooter') {
         const cur = document.documentElement.getAttribute('data-theme');
         setTheme(cur === 'dark' ? 'light' : 'dark');
