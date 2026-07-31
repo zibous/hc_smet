@@ -48,50 +48,16 @@ Jeder Controller liefert über `GET /sensorList.json` die aktuellen Zählerstän
 
 ## 🏗️ Architektur & Datenfluss
 
-```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         main.py (Lifespan)                              │
-│  1. Database init  2. PoKeys Manager  3. MQTT Publisher  4. Webhooks    │
-└────────────┬────────────────────────────────────────────────────────────┘
-             │
-     ┌───────┴────────────────────────────────────────┐
-     │                                                │
-     ▼                                                ▼
-┌─────────────────────────────┐         ┌──────────────────────────────────┐
-│  Sensor-Datenerfassung      │         │  FastAPI Server (Port 8096)      │
-│                             │         ├──────────────────────────────────┤
-│  Modus POST:                │         │  /api/sensors                    │
-│    PoKeys → HTTP POST → App │         │  /api/sensor/{id}                │
-│                             │         │  /api/room/{id}                  │
-│  Modus GET:                 │         │  /api/area/{id}                  │
-│    App pollt PoKeys (5min)  │         │  /api/home                       │
-│    GET /sensorList.json     │         │  /api/dashboard                  │
-└──────────────┬──────────────┘         │  /api/yearly                     │
-               │                        │  /api/kpidata                    │
-               ▼                        └──────────────────────────────────┘
-┌─────────────────────────────┐
-│  SensorService              │         ┌──────────────────────────────────┐
-│  • Normalisierung           │         │  HouseTopology (house.yaml)      │
-│  • Reset-Erkennung          │         │  50 Sensoren → 20 Räume          │
-│  • Delta-Berechnung         │         │  → 6 Bereiche → 1 Haus           │
-└──────────────┬──────────────┘         └──────────────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────┐         ┌──────────────────────────────────┐
-│  SQLite DB (pro Jahr)       │         │  MQTT Publisher (alle 5 Min)     │
-│  sensors_2026.db            │         │  smartmeters/sensors/{id}        │
-│  ├── current_values         │         │  smartmeters/rooms/{id}          │
-│  └── hourly_values          │         │  smartmeters/areas/{id}          │
-└─────────────────────────────┘         │  smartmeters/home                │
-               │                        └──────────────────────────────────┘
-               ▼
-┌─────────────────────────────┐
-│  Calculator (on-demand)     │
-│  Tag / Woche / Monat / Jahr │
-│  + Vorperioden-Vergleich    │
-│  + Raum/Bereich/Haus-Aggr.  │
-└─────────────────────────────┘
-```
+{{< mermaid >}}
+flowchart TD
+    Main["main.py (Lifespan)<br>DB init · PoKeys · MQTT · Webhooks"] --> Sensor["Sensor-Datenerfassung<br>POST: PoKeys → App<br>GET: App pollt PoKeys (5min)"]
+    Main --> API["FastAPI Server :8096<br>/api/sensors · /api/room · /api/area<br>/api/home · /api/dashboard · /api/kpidata"]
+    Sensor --> Service["SensorService<br>Normalisierung · Reset-Erkennung · Delta"]
+    Service --> DB["SQLite DB (pro Jahr)<br>current_values · hourly_values"]
+    DB --> Calc["Calculator (on-demand)<br>Tag/Woche/Monat/Jahr + Vergleich"]
+    Main --> Topo["HouseTopology (house.yaml)<br>50 Sensoren → 20 Räume → 6 Bereiche"]
+    Main --> MQTT["MQTT Publisher (5 Min)<br>smartmeters/sensors · rooms · areas · home"]
+{{< /mermaid >}}
 
 Die App unterstützt zwei Betriebsmodi:
 - **POST-Modus**: Die PoKeys-Controller senden aktiv Daten an die App (Push)
